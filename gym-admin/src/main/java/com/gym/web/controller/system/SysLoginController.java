@@ -43,7 +43,7 @@ public class SysLoginController extends BaseController
         // 如果是Ajax请求，返回Json字符串。
         if (ServletUtils.isAjaxRequest(request))
         {
-            return ServletUtils.renderString(response, "{\"code\":\"1\",\"msg\":\"未登录或登录超时。请重新登录\"}");
+            return ServletUtils.renderString(response, "{\"code\":\"401\",\"msg\":\"未登录或登录超时。请重新登录\"}");
         }
         // 是否开启记住我
         mmap.put("isRemembered", rememberMe);
