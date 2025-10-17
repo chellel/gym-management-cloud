@@ -30,7 +30,9 @@ public class PageDomain
         {
             return "";
         }
-        return StringUtils.toUnderScoreCase(orderByColumn) + " " + isAsc;
+        // 如果isAsc为空或null，使用默认值"asc"
+        String ascValue = StringUtils.isEmpty(isAsc) ? "asc" : isAsc;
+        return StringUtils.toUnderScoreCase(orderByColumn) + " " + ascValue;
     }
 
     public Integer getPageNum()
