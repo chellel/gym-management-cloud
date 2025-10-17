@@ -66,7 +66,7 @@ public class GymUser extends BaseEntity
 
     /** 删除时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date deletedTime;
+    private Date deleteTime;
 
     public GymUser()
     {
@@ -201,14 +201,14 @@ public class GymUser extends BaseEntity
         this.isDeleted = isDeleted;
     }
 
-    public Date getDeletedTime()
+    public Date getDeleteTime()
     {
-        return deletedTime;
+        return deleteTime;
     }
 
-    public void setDeletedTime(Date deletedTime)
+    public void setDeleteTime(Date deleteTime)
     {
-        this.deletedTime = deletedTime;
+        this.deleteTime = deleteTime;
     }
 
     @Override
@@ -226,7 +226,7 @@ public class GymUser extends BaseEntity
             .append("role", getRole())
             .append("status", getStatus())
             .append("isDeleted", getIsDeleted())
-            .append("deletedTime", getDeletedTime())
+            .append("deleteTime", getDeleteTime())
             .append("createBy", getCreateBy())
             .append("createTime", getCreateTime())
             .append("updateBy", getUpdateBy())
