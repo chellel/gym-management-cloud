@@ -13,7 +13,7 @@ CREATE TABLE `gym_user` (
   `status` varchar(20) NOT NULL DEFAULT 'active' COMMENT '状态：active-正常，inactive-停用，expired-过期',
 
   -- 系统字段
-   create_by         varchar(64)     default ''                 comment '创建者',
+  create_by         varchar(64)     default ''                 comment '创建者',
   create_time       datetime                                   comment '创建时间',
   update_by         varchar(64)     default ''                 comment '更新者',
   update_time       datetime                                   comment '更新时间',

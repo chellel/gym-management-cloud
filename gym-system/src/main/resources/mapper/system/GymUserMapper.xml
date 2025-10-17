@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.system.mapper.GymUserMapper">
+
+	<resultMap type="GymUser" id="GymUserResult">
+		<id     property="id"           column="id"            />
+		<result property="userId"      column="user_id"        />
+		<result property="name"        column="name"           />
+		<result property="phone"       column="phone"         />
+		<result property="email"       column="email"         />
+		<result property="password"    column="password"      />
+		<result property="gender"      column="gender"        />
+		<result property="birthDate"   column="birth_date"    />
+		<result property="role"        column="role"          />
+		<result property="status"      column="status"        />
+		<result property="isDeleted"   column="is_deleted"   />
+		<result property="deletedTime" column="deleted_time"   />
+		<result property="createBy"    column="create_by"    />
+		<result property="createTime"  column="create_time"   />
+		<result property="updateBy"   column="update_by"    />
+		<result property="updateTime" column="update_time"    />
+		<result property="remark"      column="remark"       />
+	</resultMap>
+
+	<sql id="selectGymUserVo">
+        select id, user_id, name, phone, email, password, gender, birth_date, role, status, 
+               create_time, update_time, create_by, update_by, is_deleted, deleted_time, remark 
+        from gym_user
+    </sql>
+
+	<select id="selectGymUserList" parameterType="GymUser" resultMap="GymUserResult">
+		<include refid="selectGymUserVo"/>
+		<where>
+			<if test="userId != null and userId != ''">
+				AND user_id like concat('%', #{userId}, '%')
+			</if>
+			<if test="name != null and name != ''">
+				AND name like concat('%', #{name}, '%')
+			</if>
+			<if test="phone != null and phone != ''">
+				AND phone = #{phone}
+			</if>
+			<if test="email != null and email != ''">
+				AND email = #{email}
+			</if>
+			<if test="gender != null">
+				AND gender = #{gender}
+			</if>
+			<if test="role != null and role != ''">
+				AND role = #{role}
+			</if>
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+			AND is_deleted = 0
+		</where>
+		order by create_time desc
+	</select>
+
+	<select id="selectGymUserByUserId" parameterType="String" resultMap="GymUserResult">
+		<include refid="selectGymUserVo"/>
+		where user_id = #{userId} and is_deleted = 0
+	</select>
+
+	<select id="selectGymUserByPhone" parameterType="String" resultMap="GymUserResult">
+		<include refid="selectGymUserVo"/>
+		where phone = #{phone} and is_deleted = 0
+	</select>
+
+	<select id="selectGymUserByEmail" parameterType="String" resultMap="GymUserResult">
+		<include refid="selectGymUserVo"/>
+		where email = #{email} and is_deleted = 0
+	</select>
+
+	<select id="selectGymUserById" parameterType="Long" resultMap="GymUserResult">
+		<include refid="selectGymUserVo"/>
+		where id = #{id}
+	</select>
+
+	<select id="checkUserIdUnique" parameterType="String" resultMap="GymUserResult">
+		select id, user_id from gym_user where user_id = #{userId} and is_deleted = 0 limit 1
+	</select>
+
+	<select id="checkPhoneUnique" parameterType="String" resultMap="GymUserResult">
+		select id, phone from gym_user where phone = #{phone} and is_deleted = 0 limit 1
+	</select>
+
+	<select id="checkEmailUnique" parameterType="String" resultMap="GymUserResult">
+		select id, email from gym_user where email = #{email} and is_deleted = 0 limit 1
+	</select>
+
+	<insert id="insertGymUser" parameterType="GymUser" useGeneratedKeys="true" keyProperty="id">
+		insert into gym_user(
+			<if test="userId != null and userId != ''">user_id,</if>
+			<if test="name != null and name != ''">name,</if>
+			<if test="phone != null and phone != ''">phone,</if>
+			<if test="email != null and email != ''">email,</if>
+			<if test="password != null and password != ''">password,</if>
+			<if test="gender != null">gender,</if>
+			<if test="birthDate != null">birth_date,</if>
+			<if test="role != null and role != ''">role,</if>
+			<if test="status != null and status != ''">status,</if>
+			<if test="createBy != null and createBy != ''">create_by,</if>
+			<if test="createTime != null">create_time,</if>
+			<if test="updateBy != null and updateBy != ''">update_by,</if>
+			<if test="updateTime != null">update_time,</if>
+			<if test="remark != null and remark != ''">remark</if>
+		)values(
+			<if test="userId != null and userId != ''">#{userId},</if>
+			<if test="name != null and name != ''">#{name},</if>
+			<if test="phone != null and phone != ''">#{phone},</if>
+			<if test="email != null and email != ''">#{email},</if>
+			<if test="password != null and password != ''">#{password},</if>
+			<if test="gender != null">#{gender},</if>
+			<if test="birthDate != null">#{birthDate},</if>
+			<if test="role != null and role != ''">#{role},</if>
+			<if test="status != null and status != ''">#{status},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			<if test="createTime != null">#{createTime},</if>
+			<if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+			<if test="updateTime != null">#{updateTime},</if>
+			<if test="remark != null and remark != ''">#{remark}</if>
+		)
+	</insert>
+
+	<update id="updateGymUser" parameterType="GymUser">
+		update gym_user
+		<set>
+			<if test="userId != null and userId != ''">user_id = #{userId},</if>
+			<if test="name != null and name != ''">name = #{name},</if>
+			<if test="phone != null and phone != ''">phone = #{phone},</if>
+			<if test="email != null and email != ''">email = #{email},</if>
+			<if test="password != null and password != ''">password = #{password},</if>
+			<if test="gender != null">gender = #{gender},</if>
+			<if test="birthDate != null">birth_date = #{birthDate},</if>
+			<if test="role != null and role != ''">role = #{role},</if>
+			<if test="status != null and status != ''">status = #{status},</if>
+			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+			<if test="updateTime != null">update_time = #{updateTime},</if>
+			<if test="remark != null and remark != ''">remark = #{remark}</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<update id="updateGymUserStatus">
+		update gym_user SET status = #{status}, update_time = now() where id = #{id}
+	</update>
+
+	<update id="resetGymUserPwd">
+		update gym_user SET password = #{password}, update_time = now() where id = #{id}
+	</update>
+
+	<update id="deleteGymUserById" parameterType="Long">
+		update gym_user set is_deleted = 1, deleted_time = now() where id = #{id}
+	</update>
+
+	<update id="deleteGymUserByIds" parameterType="Long">
+		update gym_user set is_deleted = 1, deleted_time = now() where id in
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</update>
+
+</mapper>
