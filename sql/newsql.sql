@@ -30,14 +30,14 @@ CREATE TABLE `gym_user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='gym用户信息表';
 
 -- 插入示例数据
-INSERT INTO `gym_user` (`user_id`, `name`, `phone`, `email`, `password`, `gender`, `birth_date`, `role`, `status`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `is_deleted`, `delete_time`) VALUES
+INSERT INTO `gym_user` (`user_id`, `name`, `phone`, `email`, `password`, `gender`, `birth_date`, `role`, `status`, `experience`, `description`, `hire_date`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `is_deleted`, `delete_time`) VALUES
 -- 会员数据
-('M001', '张三', '13800138001', 'zhangsan@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1990-05-15', 'member', 'active', 'admin', '2024-01-15 10:30:00', 'admin', '2024-01-15 10:30:00', 'VIP会员，健身经验丰富', 0, NULL),
-('M002', '李四', '13800138002', 'lisi@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1988-12-03', 'member', 'active', 'admin', '2024-01-16 14:20:00', 'admin', '2024-01-16 14:20:00', '新会员，正在适应训练', 0, NULL),
-('M003', '王五', '13800138003', 'wangwu@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1995-08-22', 'member', 'active', 'admin', '2024-01-17 09:15:00', 'admin', '2024-01-17 09:15:00', '瑜伽爱好者', 0, NULL),
-('M004', '赵六', '13800138004', 'zhaoliu@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1992-03-10', 'member', 'inactive', 'admin', '2024-01-18 16:45:00', 'admin', '2024-01-20 11:30:00', '暂停会员资格', 0, NULL),
-('M005', '孙七', '13800138005', 'sunqi@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1987-11-28', 'member', 'expired', 'admin', '2024-01-19 13:20:00', 'admin', '2024-01-25 10:15:00', '会员卡已过期', 0, NULL),
-('M006', '钱八', '13800138006', 'qianba@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1993-06-15', 'member', 'leave', 'admin', '2024-01-20 09:30:00', 'admin', '2024-01-22 14:20:00', '因工作出差请假', 0, NULL),
+('M001', '张三', '13800138001', 'zhangsan@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1990-05-15', 'member', 'active', NULL, NULL, NULL, 'admin', '2024-01-15 10:30:00', 'admin', '2024-01-15 10:30:00', 'VIP会员，健身经验丰富', 0, NULL),
+('M002', '李四', '13800138002', 'lisi@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1988-12-03', 'member', 'active', NULL, NULL, NULL, 'admin', '2024-01-16 14:20:00', 'admin', '2024-01-16 14:20:00', '新会员，正在适应训练', 0, NULL),
+('M003', '王五', '13800138003', 'wangwu@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1995-08-22', 'member', 'active', NULL, NULL, NULL, 'admin', '2024-01-17 09:15:00', 'admin', '2024-01-17 09:15:00', '瑜伽爱好者', 0, NULL),
+('M004', '赵六', '13800138004', 'zhaoliu@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1992-03-10', 'member', 'inactive', NULL, NULL, NULL, 'admin', '2024-01-18 16:45:00', 'admin', '2024-01-20 11:30:00', '暂停会员资格', 0, NULL),
+('M005', '孙七', '13800138005', 'sunqi@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1987-11-28', 'member', 'expired', NULL, NULL, NULL, 'admin', '2024-01-19 13:20:00', 'admin', '2024-01-25 10:15:00', '会员卡已过期', 0, NULL),
+('M006', '钱八', '13800138006', 'qianba@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1993-06-15', 'member', 'leave', NULL, NULL, NULL, 'admin', '2024-01-20 09:30:00', 'admin', '2024-01-22 14:20:00', '因工作出差请假', 0, NULL),
 
 -- 教练数据
 ('C001', '刘教练', '13900139001', 'liujiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1985-06-18', 'coach', 'active', 'admin', '2024-01-10 08:00:00', 'admin', '2024-01-10 08:00:00', '资深健身教练，擅长力量训练', 0, NULL),

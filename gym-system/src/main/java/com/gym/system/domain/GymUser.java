@@ -61,6 +61,19 @@ public class GymUser extends BaseEntity
     @Excel(name = "状态", readConverterExp = "active=正常,inactive=停用,expired=过期")
     private String status;
 
+    /** 经验年限（教练专用） */
+    @Excel(name = "经验年限")
+    private String experience;
+
+    /** 个人简介（教练专用） */
+    @Excel(name = "个人简介")
+    private String description;
+
+    /** 入职时间（教练专用） */
+    @Excel(name = "入职时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date hireDate;
+
     /** 是否删除：0-未删除，1-已删除 */
     private Integer isDeleted;
 
@@ -190,6 +203,37 @@ public class GymUser extends BaseEntity
         this.status = status;
     }
 
+    @Size(min = 0, max = 50, message = "经验年限长度不能超过50个字符")
+    public String getExperience()
+    {
+        return experience;
+    }
+
+    public void setExperience(String experience)
+    {
+        this.experience = experience;
+    }
+
+    @Size(min = 0, max = 1000, message = "个人简介长度不能超过1000个字符")
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public Date getHireDate()
+    {
+        return hireDate;
+    }
+
+    public void setHireDate(Date hireDate)
+    {
+        this.hireDate = hireDate;
+    }
 
     public Integer getIsDeleted()
     {
@@ -225,6 +269,9 @@ public class GymUser extends BaseEntity
             .append("birthDate", getBirthDate())
             .append("role", getRole())
             .append("status", getStatus())
+            .append("experience", getExperience())
+            .append("description", getDescription())
+            .append("hireDate", getHireDate())
             .append("isDeleted", getIsDeleted())
             .append("deleteTime", getDeleteTime())
             .append("createBy", getCreateBy())
