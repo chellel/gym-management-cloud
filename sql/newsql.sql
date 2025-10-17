@@ -10,7 +10,12 @@ CREATE TABLE `gym_user` (
   `gender` tinyint(1) DEFAULT NULL COMMENT '性别：0-女，1-男',
   `birth_date` date DEFAULT NULL COMMENT '出生日期',
   `role` varchar(20) NOT NULL DEFAULT 'member' COMMENT '角色：member-会员，coach-教练',
-  `status` varchar(20) NOT NULL DEFAULT 'active' COMMENT '状态：active-正常，inactive-停用，expired-过期，leave-请假',
+  `status` varchar(20) NOT NULL DEFAULT 'active' COMMENT '状态：active-正常，inactive-停用，expired-过期，suspended-暂停',
+  
+  -- 教练专用字段
+  `experience` varchar(50) DEFAULT NULL COMMENT '经验年限，如：5年',
+  `description` text DEFAULT NULL COMMENT '个人简介',
+  `hire_date` date DEFAULT NULL COMMENT '入职时间',
 
   -- 系统字段
   create_by         varchar(64)     default ''                 comment '创建者',
