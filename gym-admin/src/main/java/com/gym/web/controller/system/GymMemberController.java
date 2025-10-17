@@ -132,7 +132,7 @@ public class GymMemberController extends BaseController
         GymUser gymUser = gymUserService.selectGymUserById(gymMembership.getUserId());
         
         GymMemberDTO gymMemberDTO = new GymMemberDTO();
-        gymMemberDTO.setUserId(gymUser.getId());
+        gymMemberDTO.setUserId(gymUser.getUserId());
         gymMemberDTO.setUserCode(gymUser.getUserId());
         gymMemberDTO.setUserName(gymUser.getName());
         gymMemberDTO.setPhone(gymUser.getPhone());
@@ -163,7 +163,7 @@ public class GymMemberController extends BaseController
         GymUser gymUser = gymUserService.selectGymUserById(gymMembership.getUserId());
         
         GymMemberDTO gymMemberDTO = new GymMemberDTO();
-        gymMemberDTO.setUserId(gymUser.getId());
+        gymMemberDTO.setUserId(gymUser.getUserId());
         gymMemberDTO.setUserCode(gymUser.getUserId());
         gymMemberDTO.setUserName(gymUser.getName());
         gymMemberDTO.setPhone(gymUser.getPhone());
@@ -298,7 +298,7 @@ public class GymMemberController extends BaseController
         
         GymUser gymUser = gymUserService.selectGymUserById(gymMembership.getUserId());
         GymMemberDTO gymMemberDTO = new GymMemberDTO();
-        gymMemberDTO.setUserId(gymUser.getId());
+        gymMemberDTO.setUserId(gymUser.getUserId());
         gymMemberDTO.setUserCode(gymUser.getUserId());
         gymMemberDTO.setUserName(gymUser.getName());
         gymMemberDTO.setPhone(gymUser.getPhone());

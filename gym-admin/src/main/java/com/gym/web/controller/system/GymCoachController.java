@@ -92,20 +92,20 @@ public class GymCoachController extends BaseController
     @ResponseBody
     public AjaxResult addSave(@Validated GymUser gymUser)
     {
-        if (UserConstants.NOT_UNIQUE.equals(gymUserService.checkUserIdUnique(gymUser)))
+        if (!gymUserService.checkUserIdUnique(gymUser))
         {
             return error("新增教练'" + gymUser.getUserId() + "'失败，教练编号已存在");
         }
-        else if (UserConstants.NOT_UNIQUE.equals(gymUserService.checkPhoneUnique(gymUser)))
+        else if (!gymUserService.checkPhoneUnique(gymUser))
         {
             return error("新增教练'" + gymUser.getUserId() + "'失败，手机号码已存在");
         }
         else if (StringUtils.isNotEmpty(gymUser.getEmail())
-                && UserConstants.NOT_UNIQUE.equals(gymUserService.checkEmailUnique(gymUser)))
+                && !gymUserService.checkEmailUnique(gymUser))
         {
             return error("新增教练'" + gymUser.getUserId() + "'失败，邮箱账号已存在");
         }
-        gymUser.setCreateBy(getLoginUser().getUsername());
+        gymUser.setCreateBy(getSysUser().getLoginName());
         gymUser.setPassword(Md5Utils.hash(gymUser.getPassword()));
         gymUser.setRole("coach"); // 设置为教练角色
         return toAjax(gymUserService.insertGymUser(gymUser));
@@ -115,10 +115,10 @@ public class GymCoachController extends BaseController
      * 修改教练
      */
     @RequiresPermissions("system:gymcoach:edit")
-    @GetMapping("/edit/{userId}")
-    public String edit(@PathVariable("userId") Long userId, ModelMap mmap)
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, ModelMap mmap)
     {
-        GymUser gymUser = gymUserService.selectGymUserById(userId);
+        GymUser gymUser = gymUserService.selectGymUserById(id);
         mmap.put("gymUser", gymUser);
         return prefix + "/edit";
     }
@@ -132,20 +132,20 @@ public class GymCoachController extends BaseController
     @ResponseBody
     public AjaxResult editSave(@Validated GymUser gymUser)
     {
-        if (UserConstants.NOT_UNIQUE.equals(gymUserService.checkUserIdUnique(gymUser)))
+        if (!gymUserService.checkUserIdUnique(gymUser))
         {
             return error("修改教练'" + gymUser.getUserId() + "'失败，教练编号已存在");
         }
-        else if (UserConstants.NOT_UNIQUE.equals(gymUserService.checkPhoneUnique(gymUser)))
+        else if (!gymUserService.checkPhoneUnique(gymUser))
         {
             return error("修改教练'" + gymUser.getUserId() + "'失败，手机号码已存在");
         }
         else if (StringUtils.isNotEmpty(gymUser.getEmail())
-                && UserConstants.NOT_UNIQUE.equals(gymUserService.checkEmailUnique(gymUser)))
+                && !gymUserService.checkEmailUnique(gymUser))
         {
             return error("修改教练'" + gymUser.getUserId() + "'失败，邮箱账号已存在");
         }
-        gymUser.setUpdateBy(getLoginUser().getUsername());
+        gymUser.setUpdateBy(getSysUser().getLoginName());
         gymUser.setRole("coach"); // 确保角色为教练
         return toAjax(gymUserService.updateGymUser(gymUser));
     }
@@ -172,10 +172,10 @@ public class GymCoachController extends BaseController
      */
     @RequiresPermissions("system:gymcoach:resetPwd")
     @Log(title = "教练管理", businessType = BusinessType.UPDATE)
-    @GetMapping("/resetPwd/{userId}")
-    public String resetPwd(@PathVariable("userId") Long userId, ModelMap mmap)
+    @GetMapping("/resetPwd/{id}")
+    public String resetPwd(@PathVariable("id") Long id, ModelMap mmap)
     {
-        mmap.put("gymUser", gymUserService.selectGymUserById(userId));
+        mmap.put("gymUser", gymUserService.selectGymUserById(id));
         return prefix + "/resetPwd";
     }
 
@@ -189,7 +189,7 @@ public class GymCoachController extends BaseController
     public AjaxResult resetPwdSave(GymUser gymUser)
     {
         gymUser.setPassword(Md5Utils.hash(gymUser.getPassword()));
-        gymUser.setUpdateBy(getLoginUser().getUsername());
+        gymUser.setUpdateBy(getSysUser().getLoginName());
         return toAjax(gymUserService.resetGymUserPwd(gymUser));
     }
 
@@ -202,7 +202,7 @@ public class GymCoachController extends BaseController
     @ResponseBody
     public AjaxResult changeStatus(GymUser gymUser)
     {
-        gymUser.setUpdateBy(getLoginUser().getUsername());
+        gymUser.setUpdateBy(getSysUser().getLoginName());
         return toAjax(gymUserService.updateGymUserStatus(gymUser.getId(), gymUser.getStatus()));
     }
 
@@ -216,7 +216,7 @@ public class GymCoachController extends BaseController
     {
         ExcelUtil<GymUser> util = new ExcelUtil<GymUser>(GymUser.class);
         List<GymUser> gymUserList = util.importExcel(file.getInputStream());
-        String operName = getLoginUser().getUsername();
+        String operName = getSysUser().getLoginName();
         String message = gymUserService.importGymUser(gymUserList, updateSupport, operName);
         return success(message);
     }
