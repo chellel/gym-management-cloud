@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.system.mapper.GymBookingMapper">
+    
+    <resultMap type="GymBooking" id="GymBookingResult">
+        <result property="id"               column="id"                />
+        <result property="scheduleId"        column="schedule_id"       />
+        <result property="memberId"          column="member_id"         />
+        <result property="bookingTime"      column="booking_time"      />
+        <result property="checkinTime"       column="checkin_time"      />
+        <result property="createBy"          column="create_by"         />
+        <result property="createTime"        column="create_time"       />
+        <result property="updateBy"          column="update_by"         />
+        <result property="updateTime"        column="update_time"       />
+        <result property="remark"            column="remark"            />
+        <result property="isDeleted"         column="is_deleted"       />
+        <result property="deleteTime"        column="delete_time"       />
+        <result property="courseName"        column="course_name"      />
+        <result property="coachName"         column="coach_name"       />
+        <result property="scheduleStartTime" column="schedule_start_time"/>
+        <result property="scheduleEndTime"   column="schedule_end_time" />
+        <result property="scheduleLocation"  column="schedule_location" />
+        <result property="scheduleStatus"   column="schedule_status"   />
+    </resultMap>
+
+    <sql id="selectGymBookingVo">
+        select b.id, b.schedule_id, b.member_id, b.booking_time, b.checkin_time, 
+               b.create_by, b.create_time, b.update_by, b.update_time, b.remark, b.is_deleted, b.delete_time,
+               c.name as course_name, u.name as coach_name,
+               s.start_time as schedule_start_time, s.end_time as schedule_end_time, 
+               s.location as schedule_location, s.status as schedule_status
+        from gym_booking b
+        left join gym_schedule s on b.schedule_id = s.id
+        left join gym_course c on s.course_id = c.id
+        left join gym_user u on s.coach_id = u.id
+    </sql>
+
+    <select id="selectGymBookingList" parameterType="GymBooking" resultMap="GymBookingResult">
+        <include refid="selectGymBookingVo"/>
+        <where>  
+            <if test="scheduleId != null "> and b.schedule_id = #{scheduleId}</if>
+            <if test="memberId != null "> and b.member_id = #{memberId}</if>
+            <if test="bookingTime != null "> and b.booking_time &gt;= #{bookingTime}</if>
+            <if test="checkinTime != null "> and b.checkin_time &lt;= #{checkinTime}</if>
+            <if test="courseName != null  and courseName != ''"> and c.name like concat('%', #{courseName}, '%')</if>
+            <if test="coachName != null  and coachName != ''"> and u.name like concat('%', #{coachName}, '%')</if>
+            and b.is_deleted = 0
+        </where>
+        order by b.booking_time desc
+    </select>
+    
+    <select id="selectGymBookingById" parameterType="Long" resultMap="GymBookingResult">
+        <include refid="selectGymBookingVo"/>
+        where b.id = #{id} and b.is_deleted = 0
+    </select>
+
+    <select id="selectGymBookingByScheduleId" resultMap="GymBookingResult">
+        <include refid="selectGymBookingVo"/>
+        where b.schedule_id = #{scheduleId} and b.is_deleted = 0 and b.member_id = #{memberId}
+        order by b.booking_time
+    </select>
+
+    <select id="selectGymBookingByMemberId" parameterType="Long" resultMap="GymBookingResult">
+        <include refid="selectGymBookingVo"/>
+        where b.member_id = #{memberId} and b.is_deleted = 0
+        order by b.booking_time desc
+    </select>
+
+    <select id="selectGymBookingByScheduleAndMember" resultMap="GymBookingResult">
+        <include refid="selectGymBookingVo"/>
+        where b.schedule_id = #{scheduleId} and b.member_id = #{memberId} and b.is_deleted = 0
+    </select>
+
+    <select id="selectTodayBookings" resultMap="GymBookingResult">
+        <include refid="selectGymBookingVo"/>
+        where b.is_deleted = 0 
+        and date(b.booking_time) = curdate()
+        order by b.booking_time
+    </select>
+
+    <select id="selectUpcomingBookings" resultMap="GymBookingResult">
+        <include refid="selectGymBookingVo"/>
+        where b.is_deleted = 0 
+        and b.checkin_time is null
+        and s.start_time between now() and date_add(now(), interval 1 hour)
+        order by s.start_time
+    </select>
+
+    <select id="checkBookingExists" resultType="int">
+        select count(1) from gym_booking 
+        where schedule_id = #{scheduleId} 
+        and member_id = #{memberId}
+        and is_deleted = 0
+    </select>
+
+    <select id="countBookingsByScheduleId" parameterType="Long" resultType="int">
+        select count(1) from gym_booking 
+        where schedule_id = #{scheduleId} 
+        and is_deleted = 0
+    </select>
+        
+    <insert id="insertGymBooking" parameterType="GymBooking" useGeneratedKeys="true" keyProperty="id">
+        insert into gym_booking
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="scheduleId != null">schedule_id,</if>
+            <if test="memberId != null">member_id,</if>
+            <if test="bookingTime != null">booking_time,</if>
+            <if test="checkinTime != null">checkin_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="deleteTime != null">delete_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="scheduleId != null">#{scheduleId},</if>
+            <if test="memberId != null">#{memberId},</if>
+            <if test="bookingTime != null">#{bookingTime},</if>
+            <if test="checkinTime != null">#{checkinTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="deleteTime != null">#{deleteTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateGymBooking" parameterType="GymBooking">
+        update gym_booking
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="scheduleId != null">schedule_id = #{scheduleId},</if>
+            <if test="memberId != null">member_id = #{memberId},</if>
+            <if test="bookingTime != null">booking_time = #{bookingTime},</if>
+            <if test="checkinTime != null">checkin_time = #{checkinTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="deleteTime != null">delete_time = #{deleteTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="checkinBooking" parameterType="Long">
+        update gym_booking set checkin_time = now(), update_time = now() where id = #{id}
+    </update>
+
+    <update id="deleteGymBookingById" parameterType="Long">
+        update gym_booking set is_deleted = 1, delete_time = now() where id = #{id}
+    </update>
+
+    <update id="deleteGymBookingByIds" parameterType="Long">
+        update gym_booking set is_deleted = 1, delete_time = now() where id in 
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+</mapper>

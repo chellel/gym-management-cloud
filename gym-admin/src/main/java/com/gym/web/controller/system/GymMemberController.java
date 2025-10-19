@@ -117,7 +117,7 @@ public class GymMemberController extends BaseController
         gymMembership.setStatus("active");
         gymMembership.setRemark(gymMemberDTO.getRemark());
         gymMembership.setCreateBy(getLoginName());
-
+        gymMembership.setCreateTime(DateUtils.getNowDate());
         return toAjax(gymMembershipService.insertGymMembership(gymMembership));
     }
 
@@ -147,7 +147,8 @@ public class GymMemberController extends BaseController
         gymMemberDTO.setMembershipExpireDate(gymMembership.getExpireDate());
         gymMemberDTO.setMembershipStatus(gymMembership.getStatus());
         gymMemberDTO.setRemark(gymMembership.getRemark());
-
+        gymMembership.setUpdateBy(getLoginName());
+        gymMembership.setUpdateTime(DateUtils.getNowDate());
         mmap.put("gymMember", gymMemberDTO);
         return prefix + "/edit";
     }
