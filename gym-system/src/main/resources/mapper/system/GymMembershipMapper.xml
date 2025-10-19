@@ -194,4 +194,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		</foreach>
 	</update>
 
+	<!-- 会员统计查询 -->
+	<select id="selectMemberStatistics" resultType="java.util.Map">
+		SELECT 
+			(SELECT COUNT(1) FROM gym_membership WHERE is_deleted = 0) as totalMembers,
+			(SELECT COUNT(1) FROM gym_membership WHERE is_deleted = 0 AND status = 'active' 
+			 AND start_date &lt;= CURDATE() AND expire_date >= CURDATE()) as activeMembers,
+			(SELECT COUNT(1) FROM gym_membership WHERE is_deleted = 0 AND status = 'active' 
+			 AND expire_date &lt; CURDATE()) as expiredMembers,
+			(SELECT COUNT(1) FROM gym_membership WHERE is_deleted = 0 
+			 AND DATE_FORMAT(create_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) as newMembers
+	</select>
+
 </mapper>

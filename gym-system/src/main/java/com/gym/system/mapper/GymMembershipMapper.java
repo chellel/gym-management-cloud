@@ -86,6 +86,13 @@ public interface GymMembershipMapper
     public int deleteGymMembershipByIds(Long[] ids);
 
     /**
+     * 查询会员统计数据
+     * 
+     * @return 统计数据Map
+     */
+    public java.util.Map<String, Object> selectMemberStatistics();
+
+    /**
      * 检查用户是否有有效会籍
      * 
      * @param userId 用户ID

@@ -204,4 +204,15 @@ public class GymMembershipServiceImpl implements IGymMembershipService
     {
         return gymMembershipMapper.selectGymMemberList(gymMemberDTO);
     }
+
+    /**
+     * 查询会员统计数据
+     * 
+     * @return 统计数据Map
+     */
+    @Override
+    public java.util.Map<String, Object> selectMemberStatistics()
+    {
+        return gymMembershipMapper.selectMemberStatistics();
+    }
 }

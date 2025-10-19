@@ -114,4 +114,11 @@ public interface IGymMembershipService
      */
     public List<com.gym.system.domain.dto.GymMemberDTO> selectGymMemberList(com.gym.system.domain.dto.GymMemberDTO gymMemberDTO);
 
+    /**
+     * 查询会员统计数据
+     * 
+     * @return 统计数据Map
+     */
+    public java.util.Map<String, Object> selectMemberStatistics();
+
 }
