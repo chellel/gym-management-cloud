@@ -1,3 +1,22 @@
+-- 健身房管理系统 - 管理员表 (gym_admin)
+
+CREATE TABLE `gym_admin` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '管理员ID，主键',
+  `username` varchar(100) NOT NULL COMMENT '用户名',
+  `name` varchar(100) NOT NULL COMMENT '真实姓名',
+  `phone` varchar(20) NOT NULL COMMENT '手机号码',
+  `password` varchar(255) NOT NULL COMMENT '密码，加密存储',
+  `role` varchar(20) NOT NULL DEFAULT 'admin' COMMENT '角色：super_admin-超级管理员，admin-普通管理员',
+  `status` varchar(20) NOT NULL DEFAULT 'active' COMMENT '状态：active-正常，inactive-停用',
+
+  -- 系统字段
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_username` (`username`),
+  KEY `idx_role` (`role`),
+  KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管理员用户表';
+
 -- 健身房管理系统 - 会员表 (gym_user)
 
 CREATE TABLE `gym_user` (
