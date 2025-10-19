@@ -33,9 +33,11 @@ public class GymCourseController extends BaseController
 //    @RequiresPermissions("system:gymcourse:list")
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(GymCourse gymCourse)
+    public TableDataInfo list(GymCourse gymCourse, 
+                             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
+                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
     {
-        startPage();
+        startPage(page, pageSize);
         List<GymCourse> list = gymCourseService.selectGymCourseList(gymCourse);
         return getDataTable(list);
     }
