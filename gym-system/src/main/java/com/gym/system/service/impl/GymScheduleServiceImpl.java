@@ -210,13 +210,6 @@ public class GymScheduleServiceImpl implements IGymScheduleService
             return false;
         }
         
-        // 排班不能早于当前时间
-        Date now = new Date();
-        if (startTime.before(now))
-        {
-            return false;
-        }
-        
         // 排班时长不能超过8小时
         long duration = endTime.getTime() - startTime.getTime();
         long maxDuration = 8 * 60 * 60 * 1000; // 8小时

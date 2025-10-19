@@ -50,7 +50,7 @@ public class GymScheduleController extends BaseController
     @Log(title = "排班管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
-    public AjaxResult addSave(@Validated GymSchedule gymSchedule)
+    public AjaxResult addSave(@RequestBody @Validated GymSchedule gymSchedule)
     {
         // 验证时间是否合理
         if (!gymScheduleService.validateScheduleTime(gymSchedule.getStartTime(), gymSchedule.getEndTime()))
