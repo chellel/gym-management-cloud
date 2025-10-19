@@ -164,9 +164,7 @@ CREATE TABLE `gym_booking` (
   `schedule_id` bigint(20) NOT NULL COMMENT '排班ID，外键',
   `member_id` bigint(20) NOT NULL COMMENT '会员ID，外键',
   `booking_time` datetime NOT NULL COMMENT '预约时间',
-  `status` varchar(20) NOT NULL DEFAULT 'confirmed' COMMENT '状态：confirmed-已确认，cancelled-已取消，attended-已参加，absent-缺席',
   `checkin_time` datetime DEFAULT NULL COMMENT '签到时间',
-  `notes` text DEFAULT NULL COMMENT '预约备注',
   
   -- 系统字段
   `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
@@ -181,7 +179,6 @@ CREATE TABLE `gym_booking` (
   UNIQUE KEY `uk_schedule_member` (`schedule_id`, `member_id`),
   KEY `idx_member_id` (`member_id`),
   KEY `idx_booking_time` (`booking_time`),
-  KEY `idx_status` (`status`),
   KEY `idx_is_deleted` (`is_deleted`),
   FOREIGN KEY (`schedule_id`) REFERENCES `gym_schedule`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`member_id`) REFERENCES `gym_user`(`id`) ON DELETE CASCADE
@@ -345,59 +342,51 @@ INSERT INTO `gym_schedule` (
 (20, 7, '2025-10-24 12:30:00', '2025-10-24 13:00:00', '拉伸区', 20, 'waiting', 'admin', NOW(), 'admin', NOW(), '拉伸放松课程', 0, NULL),
 (20, 7, '2025-10-25 12:30:00', '2025-10-25 13:00:00', '拉伸区', 20, 'waiting', 'admin', NOW(), 'admin', NOW(), '拉伸放松课程', 0, NULL);
 
-
--- 插入预约示例数据 (gym_booking)
+-- 插入课程预约示例数据 (gym_booking)
 INSERT INTO `gym_booking` (
-  `schedule_id`, `member_id`, `booking_time`, `status`, `checkin_time`, `notes`,
+  `schedule_id`, `member_id`, `booking_time`, `checkin_time`,
   `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `is_deleted`, `delete_time`
 ) VALUES
--- 张三的预约记录 (member_id: 1)
-(1, 1, '2024-01-30 10:00:00', 'confirmed', NULL, '期待晨间瑜伽课程', 'admin', NOW(), 'admin', NOW(), 'VIP会员预约', 0, NULL),
-(4, 1, '2024-01-30 15:00:00', 'confirmed', NULL, '高温瑜伽体验', 'admin', NOW(), 'admin', NOW(), 'VIP会员预约', 0, NULL),
-(10, 1, '2024-01-30 16:00:00', 'confirmed', NULL, '力量训练基础', 'admin', NOW(), 'admin', NOW(), 'VIP会员预约', 0, NULL),
+-- 张三 (member_id: 1) 的预约
+(52, 1, '2025-10-19 08:00:00', '2025-10-20 07:55:00', 'system', NOW(), 'system', NOW(), '晨间瑜伽预约', 0, NULL),
+(57, 1, '2025-10-19 08:30:00', '2025-10-20 08:55:00', 'system', NOW(), 'system', NOW(), '动感单车预约', 0, NULL),
+(61, 1, '2025-10-19 09:00:00', '2025-10-20 10:25:00', 'system', NOW(), 'system', NOW(), '力量训练基础预约', 0, NULL),
+(66, 1, '2025-10-19 10:00:00', '2025-10-20 10:55:00', 'system', NOW(), 'system', NOW(), '普拉提核心预约', 0, NULL),
 
--- 李四的预约记录 (member_id: 2)
-(2, 2, '2024-01-30 11:00:00', 'confirmed', NULL, '新会员体验', 'admin', NOW(), 'admin', NOW(), '新会员预约', 0, NULL),
-(6, 2, '2024-01-30 12:00:00', 'confirmed', NULL, '动感单车课程', 'admin', NOW(), 'admin', NOW(), '新会员预约', 0, NULL),
-(15, 2, '2024-01-30 13:00:00', 'confirmed', NULL, '普拉提核心训练', 'admin', NOW(), 'admin', NOW(), '新会员预约', 0, NULL),
+-- 李四 (member_id: 2) 的预约
+(53, 2, '2025-10-19 09:00:00', '2025-10-20 18:55:00', 'system', NOW(), 'system', NOW(), '高温瑜伽预约', 0, NULL),
+(58, 2, '2025-10-19 09:30:00', '2025-10-22 06:25:00', 'system', NOW(), 'system', NOW(), '晨跑团预约', 0, NULL),
+(62, 2, '2025-10-19 10:00:00', '2025-10-21 10:25:00', 'system', NOW(), 'system', NOW(), '杠铃操预约', 0, NULL),
+(67, 2, '2025-10-19 10:30:00', '2025-10-21 10:55:00', 'system', NOW(), 'system', NOW(), 'HIIT高强度训练预约', 0, NULL),
 
--- 王五的预约记录 (member_id: 3)
-(1, 3, '2024-01-30 14:00:00', 'confirmed', NULL, '瑜伽爱好者', 'admin', NOW(), 'admin', NOW(), '瑜伽爱好者预约', 0, NULL),
-(3, 3, '2024-01-30 15:30:00', 'confirmed', NULL, '瑜伽流课程', 'admin', NOW(), 'admin', NOW(), '瑜伽爱好者预约', 0, NULL),
-(5, 3, '2024-01-30 16:30:00', 'confirmed', NULL, '夜间瑜伽', 'admin', NOW(), 'admin', NOW(), '瑜伽爱好者预约', 0, NULL),
+-- 王五 (member_id: 3) 的预约
+(54, 3, '2025-10-19 11:00:00', '2025-10-20 19:25:00', 'system', NOW(), 'system', NOW(), '瑜伽流预约', 0, NULL),
+(55, 3, '2025-10-19 11:30:00', '2025-10-21 19:55:00', 'system', NOW(), 'system', NOW(), '冥想瑜伽预约', 0, NULL),
+(59, 3, '2025-10-19 12:00:00', '2025-10-20 18:55:00', 'system', NOW(), 'system', NOW(), '有氧舞蹈预约', 0, NULL),
+(60, 3, '2025-10-19 12:30:00', '2025-10-21 18:55:00', 'system', NOW(), 'system', NOW(), 'Zumba舞蹈预约', 0, NULL),
 
--- 赵六的预约记录 (member_id: 4) - 已停用会员
-(7, 4, '2024-01-30 17:00:00', 'cancelled', NULL, '因个人原因取消', 'admin', NOW(), 'admin', NOW(), '已停用会员', 0, NULL),
+-- 赵六 (member_id: 4) 的预约 - 部分已签到
+(56, 4, '2025-10-19 13:00:00', '2025-10-20 20:55:00', 'system', NOW(), 'system', NOW(), '夜间瑜伽预约', 0, NULL),
+(63, 4, '2025-10-19 13:30:00', '2025-10-20 18:25:00', 'system', NOW(), 'system', NOW(), 'CrossFit训练预约', 0, NULL),
+(64, 4, '2025-10-19 14:00:00', NULL, 'system', NOW(), 'system', NOW(), '拳击训练预约（未签到）', 0, NULL),
+(65, 4, '2025-10-19 14:30:00', NULL, 'system', NOW(), 'system', NOW(), '泰拳训练预约（未签到）', 0, NULL),
 
--- 孙七的预约记录 (member_id: 5) - 已过期会员
-(8, 5, '2024-01-30 18:00:00', 'cancelled', NULL, '会员卡已过期', 'admin', NOW(), 'admin', NOW(), '已过期会员', 0, NULL),
+-- 孙七 (member_id: 5) 的预约 - 已过期会员
+(68, 5, '2025-10-19 15:00:00', '2025-10-20 13:55:00', 'system', NOW(), 'system', NOW(), '游泳训练预约', 0, NULL),
+(69, 5, '2025-10-19 15:30:00', '2025-10-21 13:55:00', 'system', NOW(), 'system', NOW(), '水中健身预约', 0, NULL),
+(70, 5, '2025-10-19 16:00:00', '2025-10-20 08:25:00', 'system', NOW(), 'system', NOW(), '太极课程预约', 0, NULL),
 
--- 钱八的预约记录 (member_id: 6) - 请假中
-(9, 6, '2024-01-30 19:00:00', 'cancelled', NULL, '因工作出差请假', 'admin', NOW(), 'admin', NOW(), '请假中会员', 0, NULL),
+-- 钱八 (member_id: 6) 的预约 - 请假状态
+(71, 6, '2025-10-19 16:30:00', '2025-10-20 12:25:00', 'system', NOW(), 'system', NOW(), '拉伸放松预约', 0, NULL),
+(52, 6, '2025-10-19 17:00:00', NULL, 'system', NOW(), 'system', NOW(), '晨间瑜伽预约（请假）', 0, NULL),
+(57, 6, '2025-10-19 17:30:00', NULL, 'system', NOW(), 'system', NOW(), '动感单车预约（请假）', 0, NULL),
 
--- 一些已完成和已参加的预约记录
-(1, 1, '2024-01-29 10:00:00', 'attended', '2024-02-01 07:05:00', '准时参加', 'admin', NOW(), 'admin', NOW(), '已完成课程', 0, NULL),
-(4, 1, '2024-01-29 15:00:00', 'attended', '2024-02-01 18:02:00', '高温瑜伽体验', 'admin', NOW(), 'admin', NOW(), '已完成课程', 0, NULL),
-(10, 1, '2024-01-29 16:00:00', 'attended', '2024-02-01 10:35:00', '力量训练', 'admin', NOW(), 'admin', NOW(), '已完成课程', 0, NULL),
+-- 一些取消的预约（软删除）
+(53, 1, '2025-10-18 10:00:00', NULL, 'system', NOW(), 'system', NOW(), '高温瑜伽预约（已取消）', 1, '2025-10-19 09:00:00'),
+(58, 3, '2025-10-18 10:30:00', NULL, 'system', NOW(), 'system', NOW(), '晨跑团预约（已取消）', 1, '2025-10-19 10:00:00'),
+(61, 2, '2025-10-18 11:00:00', NULL, 'system', NOW(), 'system', NOW(), '力量训练基础预约（已取消）', 1, '2025-10-19 11:00:00');
 
--- 缺席记录
-(2, 2, '2024-01-29 11:00:00', 'absent', NULL, '未按时参加', 'admin', NOW(), 'admin', NOW(), '缺席记录', 0, NULL),
-(6, 2, '2024-01-29 12:00:00', 'absent', NULL, '临时有事', 'admin', NOW(), 'admin', NOW(), '缺席记录', 0, NULL),
 
--- 游泳课程预约
-(17, 1, '2024-01-30 20:00:00', 'confirmed', NULL, '游泳训练', 'admin', NOW(), 'admin', NOW(), '游泳课程预约', 0, NULL),
-(18, 2, '2024-01-30 21:00:00', 'confirmed', NULL, '水中健身', 'admin', NOW(), 'admin', NOW(), '水中健身预约', 0, NULL),
 
--- 格斗课程预约
-(13, 1, '2024-01-30 22:00:00', 'confirmed', NULL, '拳击训练', 'admin', NOW(), 'admin', NOW(), '拳击课程预约', 0, NULL),
-(14, 3, '2024-01-30 23:00:00', 'confirmed', NULL, '泰拳训练', 'admin', NOW(), 'admin', NOW(), '泰拳课程预约', 0, NULL),
 
--- 太极课程预约
-(19, 1, '2024-01-31 08:00:00', 'confirmed', NULL, '太极课程', 'admin', NOW(), 'admin', NOW(), '太极课程预约', 0, NULL),
-(19, 3, '2024-01-31 08:30:00', 'confirmed', NULL, '太极课程', 'admin', NOW(), 'admin', NOW(), '太极课程预约', 0, NULL),
-
--- 拉伸放松课程预约
-(20, 1, '2024-01-31 12:00:00', 'confirmed', NULL, '拉伸放松', 'admin', NOW(), 'admin', NOW(), '拉伸课程预约', 0, NULL),
-(20, 2, '2024-01-31 12:15:00', 'confirmed', NULL, '拉伸放松', 'admin', NOW(), 'admin', NOW(), '拉伸课程预约', 0, NULL),
-(20, 3, '2024-01-31 12:30:00', 'confirmed', NULL, '拉伸放松', 'admin', NOW(), 'admin', NOW(), '拉伸课程预约', 0, NULL);
 
