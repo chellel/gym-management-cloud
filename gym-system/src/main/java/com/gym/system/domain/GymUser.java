@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gym.common.annotation.Excel;
 import com.gym.common.annotation.Excel.ColumnType;
 import com.gym.common.annotation.Excel.Type;
@@ -100,6 +101,7 @@ public class GymUser extends BaseEntity
         this.id = id;
     }
 
+    @JsonProperty("userId")
     @Xss(message = "用户编号不能包含脚本字符")
     @NotBlank(message = "用户编号不能为空")
     @Size(min = 0, max = 50, message = "用户编号长度不能超过50个字符")
@@ -113,6 +115,7 @@ public class GymUser extends BaseEntity
         this.userId = userId;
     }
 
+    @JsonProperty("name")
     @Xss(message = "用户姓名不能包含脚本字符")
     @NotBlank(message = "用户姓名不能为空")
     @Size(min = 0, max = 100, message = "用户姓名长度不能超过100个字符")
@@ -126,6 +129,7 @@ public class GymUser extends BaseEntity
         this.name = name;
     }
 
+    @JsonProperty("phone")
     @NotBlank(message = "手机号码不能为空")
     @Size(min = 0, max = 20, message = "手机号码长度不能超过20个字符")
     public String getPhone()
@@ -150,7 +154,7 @@ public class GymUser extends BaseEntity
         this.email = email;
     }
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getPassword()
     {
         return password;

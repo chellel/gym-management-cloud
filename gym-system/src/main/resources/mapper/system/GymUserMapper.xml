@@ -95,12 +95,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<insert id="insertGymUser" parameterType="GymUser" useGeneratedKeys="true" keyProperty="id">
-		insert into gym_user(
+		insert into gym_user
+		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="userId != null and userId != ''">user_id,</if>
 			<if test="name != null and name != ''">name,</if>
 			<if test="phone != null and phone != ''">phone,</if>
 			<if test="email != null and email != ''">email,</if>
-			<if test="password != null and password != ''">password,</if>
+			<if test="password != null">password,</if>
 			<if test="gender != null">gender,</if>
 			<if test="birthDate != null">birth_date,</if>
 			<if test="role != null and role != ''">role,</if>
@@ -112,13 +113,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="createTime != null">create_time,</if>
 			<if test="updateBy != null and updateBy != ''">update_by,</if>
 			<if test="updateTime != null">update_time,</if>
-			<if test="remark != null and remark != ''">remark</if>
-		)values(
+			<if test="remark != null and remark != ''">remark,</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="userId != null and userId != ''">#{userId},</if>
 			<if test="name != null and name != ''">#{name},</if>
 			<if test="phone != null and phone != ''">#{phone},</if>
 			<if test="email != null and email != ''">#{email},</if>
-			<if test="password != null and password != ''">#{password},</if>
+			<if test="password != null">#{password},</if>
 			<if test="gender != null">#{gender},</if>
 			<if test="birthDate != null">#{birthDate},</if>
 			<if test="role != null and role != ''">#{role},</if>
@@ -130,8 +133,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="createTime != null">#{createTime},</if>
 			<if test="updateBy != null and updateBy != ''">#{updateBy},</if>
 			<if test="updateTime != null">#{updateTime},</if>
-			<if test="remark != null and remark != ''">#{remark}</if>
-		)
+			<if test="remark != null and remark != ''">#{remark},</if>
+		</trim>
 	</insert>
 
 	<update id="updateGymUser" parameterType="GymUser">
