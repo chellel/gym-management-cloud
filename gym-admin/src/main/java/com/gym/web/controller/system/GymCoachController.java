@@ -153,7 +153,7 @@ public class GymCoachController extends BaseController
     @Log(title = "教练管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult editSave(@Validated GymUser gymUser)
+    public AjaxResult editSave(@RequestBody @Validated GymUser gymUser)
     {
         if (!gymUserService.checkUserIdUnique(gymUser))
         {
@@ -168,12 +168,6 @@ public class GymCoachController extends BaseController
         {
             return error("修改教练'" + gymUser.getUserId() + "'失败，邮箱账号已存在");
         }
-        // 设置更新者，如果用户未登录则使用默认值
-        String updateBy = "admin"; // 默认值
-        if (getSysUser() != null && getSysUser().getLoginName() != null) {
-            updateBy = getSysUser().getLoginName();
-        }
-        gymUser.setUpdateBy(updateBy);
         gymUser.setRole("coach"); // 确保角色为教练
         return toAjax(gymUserService.updateGymUser(gymUser));
     }

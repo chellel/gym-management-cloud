@@ -100,40 +100,40 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="userId != null and userId != ''">user_id,</if>
 			<if test="name != null and name != ''">name,</if>
 			<if test="phone != null and phone != ''">phone,</if>
-			<if test="email != null and email != ''">email,</if>
+			<if test="email != null">email,</if>
 			<if test="password != null">password,</if>
 			<if test="gender != null">gender,</if>
 			<if test="birthDate != null">birth_date,</if>
 			<if test="role != null and role != ''">role,</if>
 			<if test="status != null and status != ''">status,</if>
-			<if test="experience != null and experience != ''">experience,</if>
-			<if test="description != null and description != ''">description,</if>
+			<if test="experience != null">experience,</if>
+			<if test="description != null">description,</if>
 			<if test="hireDate != null">hire_date,</if>
 			<if test="createBy != null and createBy != ''">create_by,</if>
 			<if test="createTime != null">create_time,</if>
 			<if test="updateBy != null and updateBy != ''">update_by,</if>
 			<if test="updateTime != null">update_time,</if>
-			<if test="remark != null and remark != ''">remark,</if>
+			<if test="remark != null">remark,</if>
 		</trim>
 		values
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="userId != null and userId != ''">#{userId},</if>
 			<if test="name != null and name != ''">#{name},</if>
 			<if test="phone != null and phone != ''">#{phone},</if>
-			<if test="email != null and email != ''">#{email},</if>
+			<if test="email != null">#{email},</if>
 			<if test="password != null">#{password},</if>
 			<if test="gender != null">#{gender},</if>
 			<if test="birthDate != null">#{birthDate},</if>
 			<if test="role != null and role != ''">#{role},</if>
 			<if test="status != null and status != ''">#{status},</if>
-			<if test="experience != null and experience != ''">#{experience},</if>
-			<if test="description != null and description != ''">#{description},</if>
+			<if test="experience != null">#{experience},</if>
+			<if test="description != null">#{description},</if>
 			<if test="hireDate != null">#{hireDate},</if>
 			<if test="createBy != null and createBy != ''">#{createBy},</if>
 			<if test="createTime != null">#{createTime},</if>
 			<if test="updateBy != null and updateBy != ''">#{updateBy},</if>
 			<if test="updateTime != null">#{updateTime},</if>
-			<if test="remark != null and remark != ''">#{remark},</if>
+			<if test="remark != null">#{remark},</if>
 		</trim>
 	</insert>
 
@@ -143,18 +143,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="userId != null and userId != ''">user_id = #{userId},</if>
 			<if test="name != null and name != ''">name = #{name},</if>
 			<if test="phone != null and phone != ''">phone = #{phone},</if>
-			<if test="email != null and email != ''">email = #{email},</if>
+			<if test="email != null">email = #{email},</if>
 			<if test="password != null and password != ''">password = #{password},</if>
 			<if test="gender != null">gender = #{gender},</if>
 			<if test="birthDate != null">birth_date = #{birthDate},</if>
 			<if test="role != null and role != ''">role = #{role},</if>
 			<if test="status != null and status != ''">status = #{status},</if>
-			<if test="experience != null and experience != ''">experience = #{experience},</if>
-			<if test="description != null and description != ''">description = #{description},</if>
+			<if test="experience != null">experience = #{experience},</if>
+			<if test="description != null">description = #{description},</if>
 			<if test="hireDate != null">hire_date = #{hireDate},</if>
 			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
 			<if test="updateTime != null">update_time = #{updateTime},</if>
-			<if test="remark != null and remark != ''">remark = #{remark}</if>
+			<if test="remark != null">remark = #{remark}</if>
 		</set>
 		where id = #{id}
 	</update>
