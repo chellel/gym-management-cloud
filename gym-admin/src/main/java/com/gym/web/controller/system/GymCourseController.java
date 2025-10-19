@@ -76,15 +76,15 @@ public class GymCourseController extends BaseController
     }
 
     /**
-     * 修改课程
+     * 获取课程详情
      */
-    @RequiresPermissions("system:gymcourse:edit")
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, ModelMap mmap)
+    // @RequiresPermissions("system:gymcourse:view")
+    @GetMapping("/{id}")
+    @ResponseBody
+    public AjaxResult getCourseDetail(@PathVariable("id") Long id)
     {
         GymCourse gymCourse = gymCourseService.selectGymCourseById(id);
-        mmap.put("gymCourse", gymCourse);
-        return prefix + "/edit";
+        return AjaxResult.success(gymCourse);
     }
 
     /**
