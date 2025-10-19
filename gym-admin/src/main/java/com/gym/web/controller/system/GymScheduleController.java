@@ -3,7 +3,6 @@ package com.gym.web.controller.system;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -33,7 +32,6 @@ public class GymScheduleController extends BaseController
     /**
      * 查询排班列表
      */
-//    @RequiresPermissions("system:gymschedule:list")
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(GymSchedule gymSchedule)
@@ -46,7 +44,6 @@ public class GymScheduleController extends BaseController
     /**
      * 新增保存排班
      */
-//    @RequiresPermissions("system:gymschedule:add")
     @Log(title = "排班管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
@@ -70,7 +67,6 @@ public class GymScheduleController extends BaseController
     /**
      * 获取排班详情
      */
-    // @RequiresPermissions("system:gymschedule:view")
     @GetMapping("/{id}")
     @ResponseBody
     public AjaxResult getScheduleDetail(@PathVariable("id") Long id)
@@ -82,7 +78,6 @@ public class GymScheduleController extends BaseController
     /**
      * 修改保存排班
      */
-//    @RequiresPermissions("system:gymschedule:edit")
     @Log(title = "排班管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
@@ -106,7 +101,6 @@ public class GymScheduleController extends BaseController
     /**
      * 删除排班
      */
-//    @RequiresPermissions("system:gymschedule:remove")
     @Log(title = "排班管理", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
@@ -118,7 +112,6 @@ public class GymScheduleController extends BaseController
     /**
      * 修改排班状态
      */
-//    @RequiresPermissions("system:gymschedule:edit")
     @Log(title = "排班管理", businessType = BusinessType.UPDATE)
     @PostMapping("/changeStatus")
     @ResponseBody

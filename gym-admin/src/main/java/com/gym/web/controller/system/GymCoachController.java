@@ -4,7 +4,6 @@ import java.util.List;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -19,7 +18,6 @@ import com.gym.common.core.page.TableDataInfo;
 import com.gym.common.core.text.Convert;
 import com.gym.common.enums.BusinessType;
 import com.gym.common.utils.StringUtils;
-import com.gym.common.utils.poi.ExcelUtil;
 import com.gym.common.utils.security.Md5Utils;
 import com.gym.common.constant.UserConstants;
 import com.gym.system.domain.GymUser;
@@ -41,7 +39,6 @@ public class GymCoachController extends BaseController
     @Autowired
     private IGymUserService gymUserService;
 
-//    @RequiresPermissions("system:gymcoach:view")
     @GetMapping()
     public String gymcoach()
     {
@@ -51,7 +48,6 @@ public class GymCoachController extends BaseController
     /**
      * 查询教练列表
      */
-//    @RequiresPermissions("system:gymcoach:list")
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(GymUser gymUser)
@@ -64,24 +60,8 @@ public class GymCoachController extends BaseController
     }
 
     /**
-     * 导出教练列表
-     */
-    @Log(title = "教练管理", businessType = BusinessType.EXPORT)
-    @RequiresPermissions("system:gymcoach:export")
-    @PostMapping("/export")
-    @ResponseBody
-    public AjaxResult export(GymUser gymUser)
-    {
-        gymUser.setRole("coach");
-        List<GymUser> list = gymUserService.selectGymUserList(gymUser);
-        ExcelUtil<GymUser> util = new ExcelUtil<GymUser>(GymUser.class);
-        return util.exportExcel(list, "教练数据");
-    }
-
-    /**
      * 新增教练
      */
-    @RequiresPermissions("system:gymcoach:add")
     @GetMapping("/add")
     public String add()
     {
@@ -91,8 +71,7 @@ public class GymCoachController extends BaseController
     /**
      * 新增保存教练
      */
-//    @RequiresPermissions("system:gymcoach:add")
-    @Log(title = "教练管理", businessType = BusinessType.INSERT)
+//    @Log(title = "教练管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
     public AjaxResult addSave(@RequestBody GymUser gymUser, HttpServletRequest request)
@@ -160,7 +139,6 @@ public class GymCoachController extends BaseController
     /**
      * 获取教练详情
      */
-    // @RequiresPermissions("system:gymcoach:view")
     @GetMapping("/{id}")
     @ResponseBody
     public AjaxResult getCoachDetail(@PathVariable("id") Long id)
@@ -172,7 +150,6 @@ public class GymCoachController extends BaseController
     /**
      * 修改保存教练
      */
-    @RequiresPermissions("system:gymcoach:edit")
     @Log(title = "教练管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
@@ -204,7 +181,6 @@ public class GymCoachController extends BaseController
     /**
      * 删除教练
      */
-    @RequiresPermissions("system:gymcoach:remove")
     @Log(title = "教练管理", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
@@ -221,7 +197,6 @@ public class GymCoachController extends BaseController
     /**
      * 重置教练密码
      */
-    @RequiresPermissions("system:gymcoach:resetPwd")
     @Log(title = "教练管理", businessType = BusinessType.UPDATE)
     @GetMapping("/resetPwd/{id}")
     public String resetPwd(@PathVariable("id") Long id, ModelMap mmap)
@@ -233,7 +208,6 @@ public class GymCoachController extends BaseController
     /**
      * 重置教练密码
      */
-    @RequiresPermissions("system:gymcoach:resetPwd")
     @Log(title = "教练管理", businessType = BusinessType.UPDATE)
     @PostMapping("/resetPwd")
     @ResponseBody
@@ -252,7 +226,6 @@ public class GymCoachController extends BaseController
     /**
      * 教练状态修改
      */
-    @RequiresPermissions("system:gymcoach:edit")
     @Log(title = "教练管理", businessType = BusinessType.UPDATE)
     @PostMapping("/changeStatus")
     @ResponseBody
@@ -265,36 +238,5 @@ public class GymCoachController extends BaseController
         }
         gymUser.setUpdateBy(updateBy);
         return toAjax(gymUserService.updateGymUserStatus(gymUser.getId(), gymUser.getStatus()));
-    }
-
-    /**
-     * 教练导入
-     */
-    @RequiresPermissions("system:gymcoach:import")
-    @PostMapping("/importData")
-    @ResponseBody
-    public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception
-    {
-        ExcelUtil<GymUser> util = new ExcelUtil<GymUser>(GymUser.class);
-        List<GymUser> gymUserList = util.importExcel(file.getInputStream());
-        // 设置操作者，如果用户未登录则使用默认值
-        String operName = "admin"; // 默认值
-        if (getSysUser() != null && getSysUser().getLoginName() != null) {
-            operName = getSysUser().getLoginName();
-        }
-        String message = gymUserService.importGymUser(gymUserList, updateSupport, operName);
-        return success(message);
-    }
-
-    /**
-     * 下载导入模板
-     */
-    @RequiresPermissions("system:gymcoach:import")
-    @GetMapping("/importTemplate")
-    @ResponseBody
-    public AjaxResult importTemplate()
-    {
-        ExcelUtil<GymUser> util = new ExcelUtil<GymUser>(GymUser.class);
-        return util.importTemplateExcel("教练数据");
     }
 }

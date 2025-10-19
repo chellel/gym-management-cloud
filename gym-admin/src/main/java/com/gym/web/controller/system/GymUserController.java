@@ -1,7 +1,6 @@
 package com.gym.web.controller.system;
 
 import java.util.List;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -59,7 +58,6 @@ public class GymUserController extends BaseController
      * 导入会员数据
      */
     @Log(title = "会员管理", businessType = BusinessType.IMPORT)
-    @RequiresPermissions("system:gymuser:import")
     @PostMapping("/importData")
     @ResponseBody
     public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception
@@ -73,7 +71,6 @@ public class GymUserController extends BaseController
     /**
      * 新增保存会员
      */
-    @RequiresPermissions("system:gymuser:add")
     @Log(title = "会员管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
@@ -98,7 +95,6 @@ public class GymUserController extends BaseController
      /**
      * 获取会员详情
      */
-    // @RequiresPermissions("system:gymcourse:view")
     @GetMapping("/{id}")
     @ResponseBody
     public AjaxResult getUserDetail(@PathVariable("id") Long id)
@@ -110,7 +106,6 @@ public class GymUserController extends BaseController
     /**
      * 修改保存会员
      */
-    @RequiresPermissions("system:gymuser:edit")
     @Log(title = "会员管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
@@ -135,7 +130,6 @@ public class GymUserController extends BaseController
     /**
      * 删除会员
      */
-    @RequiresPermissions("system:gymuser:remove")
     @Log(title = "会员管理", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
@@ -154,7 +148,6 @@ public class GymUserController extends BaseController
     /**
      * 重置会员密码
      */
-    @RequiresPermissions("system:gymuser:resetPwd")
     @GetMapping("/resetPwd/{id}")
     public String resetPwd(@PathVariable("id") Long id, ModelMap mmap)
     {
@@ -165,7 +158,6 @@ public class GymUserController extends BaseController
     /**
      * 重置会员密码
      */
-    @RequiresPermissions("system:gymuser:resetPwd")
     @Log(title = "会员管理", businessType = BusinessType.UPDATE)
     @PostMapping("/resetPwd")
     @ResponseBody
@@ -177,7 +169,6 @@ public class GymUserController extends BaseController
     /**
      * 修改会员状态
      */
-    @RequiresPermissions("system:gymuser:edit")
     @Log(title = "会员管理", businessType = BusinessType.UPDATE)
     @PostMapping("/changeStatus")
     @ResponseBody

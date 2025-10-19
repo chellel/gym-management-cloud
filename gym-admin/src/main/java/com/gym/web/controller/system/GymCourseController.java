@@ -3,7 +3,6 @@ package com.gym.web.controller.system;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -30,7 +29,6 @@ public class GymCourseController extends BaseController
     /**
      * 查询课程列表
      */
-//    @RequiresPermissions("system:gymcourse:list")
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(GymCourse gymCourse, 
@@ -45,7 +43,6 @@ public class GymCourseController extends BaseController
     /**
      * 新增保存课程
      */
-    @RequiresPermissions("system:gymcourse:add")
     @Log(title = "课程管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
@@ -61,7 +58,6 @@ public class GymCourseController extends BaseController
     /**
      * 获取课程详情
      */
-    // @RequiresPermissions("system:gymcourse:view")
     @GetMapping("/{id}")
     @ResponseBody
     public AjaxResult getCourseDetail(@PathVariable("id") Long id)
@@ -73,7 +69,6 @@ public class GymCourseController extends BaseController
     /**
      * 修改保存课程
      */
-    @RequiresPermissions("system:gymcourse:edit")
     @Log(title = "课程管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
@@ -89,7 +84,6 @@ public class GymCourseController extends BaseController
     /**
      * 删除课程
      */
-    // @RequiresPermissions("system:gymcourse:remove")
     @Log(title = "课程管理", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
