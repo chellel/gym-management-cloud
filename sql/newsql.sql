@@ -104,4 +104,86 @@ INSERT INTO `gym_membership` (`user_id`, `membership_type`, `start_date`, `expir
 
 
 
+-- 课程表 (gym_course)
+CREATE TABLE `gym_course` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '课程ID，主键',
+  `name` varchar(100) NOT NULL COMMENT '课程名称',
+  `description` text DEFAULT NULL COMMENT '课程描述',
+  `duration_minutes` int(11) NOT NULL DEFAULT 60 COMMENT '课程时长（分钟）',
+  
+  -- 系统字段
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除，1-已删除',
+  `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  
+  PRIMARY KEY (`id`),
+  KEY `idx_is_deleted` (`is_deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程信息表';
+
+
+
+-- 排期表 (gym_schedule)
+CREATE TABLE `gym_schedule` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '排期ID，主键',
+  `course_id` bigint(20) NOT NULL COMMENT '课程ID，外键',
+  `coach_id` bigint(20) NOT NULL COMMENT '教练ID，外键',
+  `start_time` datetime NOT NULL COMMENT '开始时间',
+  `end_time` datetime NOT NULL COMMENT '结束时间',
+  `location` varchar(100) NOT NULL COMMENT '上课地点',
+  `max_capacity` int(11) NOT NULL COMMENT '最大容量',
+  `status` varchar(20) NOT NULL DEFAULT 'waiting' COMMENT '状态：waiting-待开始，cancelled-已取消，completed-已完成',
+  
+  -- 系统字段
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除，1-已删除',
+  `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  
+  PRIMARY KEY (`id`),
+  KEY `idx_course_id` (`course_id`),
+  KEY `idx_coach_id` (`coach_id`),
+  KEY `idx_start_time` (`start_time`),
+  KEY `idx_status` (`status`),
+  KEY `idx_is_deleted` (`is_deleted`),
+  FOREIGN KEY (`course_id`) REFERENCES `gym_course`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`coach_id`) REFERENCES `gym_user`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程排期表';
+
+
+
+-- 课程预约表 (gym_booking)
+CREATE TABLE `gym_booking` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '预约ID，主键',
+  `schedule_id` bigint(20) NOT NULL COMMENT '排期ID，外键',
+  `member_id` bigint(20) NOT NULL COMMENT '会员ID，外键',
+  `booking_time` datetime NOT NULL COMMENT '预约时间',
+  `status` varchar(20) NOT NULL DEFAULT 'confirmed' COMMENT '状态：confirmed-已确认，cancelled-已取消，attended-已参加，absent-缺席',
+  `checkin_time` datetime DEFAULT NULL COMMENT '签到时间',
+  `notes` text DEFAULT NULL COMMENT '预约备注',
+  
+  -- 系统字段
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除，1-已删除',
+  `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_schedule_member` (`schedule_id`, `member_id`),
+  KEY `idx_member_id` (`member_id`),
+  KEY `idx_booking_time` (`booking_time`),
+  KEY `idx_status` (`status`),
+  KEY `idx_is_deleted` (`is_deleted`),
+  FOREIGN KEY (`schedule_id`) REFERENCES `gym_schedule`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`member_id`) REFERENCES `gym_user`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程预约表';
 
