@@ -39,7 +39,7 @@ public class GymScheduleController extends BaseController
     public TableDataInfo list(GymSchedule gymSchedule)
     {
         startPage();
-        List<GymSchedule> list = gymScheduleService.selectGymScheduleList(gymSchedule);
+        List<GymSchedule> list = gymScheduleService.selectGymScheduleListWithBooking(gymSchedule);
         return getDataTable(list);
     }
 
@@ -75,7 +75,7 @@ public class GymScheduleController extends BaseController
     @ResponseBody
     public AjaxResult getScheduleDetail(@PathVariable("id") Long id)
     {
-        GymSchedule gymSchedule = gymScheduleService.selectGymScheduleById(id);
+        GymSchedule gymSchedule = gymScheduleService.selectGymScheduleByIdWithBooking(id);
         return success(gymSchedule);
     }
 
@@ -156,7 +156,7 @@ public class GymScheduleController extends BaseController
     @ResponseBody
     public AjaxResult getTodaySchedules()
     {
-        List<GymSchedule> schedules = gymScheduleService.selectTodaySchedules();
+        List<GymSchedule> schedules = gymScheduleService.selectTodaySchedulesWithBooking();
         return success(schedules);
     }
 
@@ -178,7 +178,7 @@ public class GymScheduleController extends BaseController
     @ResponseBody
     public AjaxResult getSchedulesByCourse(@PathVariable("courseId") Long courseId)
     {
-        List<GymSchedule> schedules = gymScheduleService.selectGymScheduleByCourseId(courseId);
+        List<GymSchedule> schedules = gymScheduleService.selectGymScheduleByCourseIdWithBooking(courseId);
         return success(schedules);
     }
 
@@ -189,7 +189,7 @@ public class GymScheduleController extends BaseController
     @ResponseBody
     public AjaxResult getSchedulesByCoach(@PathVariable("coachId") Long coachId)
     {
-        List<GymSchedule> schedules = gymScheduleService.selectGymScheduleByCoachId(coachId);
+        List<GymSchedule> schedules = gymScheduleService.selectGymScheduleByCoachIdWithBooking(coachId);
         return success(schedules);
     }
 

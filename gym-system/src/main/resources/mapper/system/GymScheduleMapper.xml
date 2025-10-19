@@ -22,6 +22,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="deleteTime"       column="delete_time"       />
         <result property="courseName"       column="course_name"       />
         <result property="coachName"        column="coach_name"       />
+        <result property="bookingCount"     column="booking_count"     />
     </resultMap>
 
     <sql id="selectGymScheduleVo">
@@ -31,6 +32,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from gym_schedule s
         left join gym_course c on s.course_id = c.id
         left join gym_user u on s.coach_id = u.id
+    </sql>
+
+    <sql id="selectGymScheduleWithBookingVo">
+        select s.id, s.course_id, s.coach_id, s.start_time, s.end_time, s.location, s.max_capacity, s.status, 
+               s.create_by, s.create_time, s.update_by, s.update_time, s.remark, s.is_deleted, s.delete_time,
+               c.name as course_name, u.name as coach_name,
+               COALESCE(COUNT(b.id), 0) as booking_count
+        from gym_schedule s
+        left join gym_course c on s.course_id = c.id
+        left join gym_user u on s.coach_id = u.id
+        left join gym_booking b on s.id = b.schedule_id and b.is_deleted = 0
     </sql>
 
     <select id="selectGymScheduleList" parameterType="GymSchedule" resultMap="GymScheduleResult">
@@ -175,6 +187,66 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where s.is_deleted = 0 
         and s.status = 'waiting'
         and s.start_time between now() and date_add(now(), interval 1 hour)
+        order by s.start_time
+    </select>
+
+    <!-- 查询排班列表（包含预约人数） -->
+    <select id="selectGymScheduleListWithBooking" parameterType="GymSchedule" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleWithBookingVo"/>
+        <where>  
+            <if test="courseId != null "> and s.course_id = #{courseId}</if>
+            <if test="coachId != null "> and s.coach_id = #{coachId}</if>
+            <if test="location != null  and location != ''"> and s.location like concat('%', #{location}, '%')</if>
+            <if test="status != null  and status != ''"> and s.status = #{status}</if>
+            <if test="startTime != null "> and s.start_time &gt;= #{startTime}</if>
+            <if test="endTime != null "> and s.end_time &lt;= #{endTime}</if>
+            <if test="courseName != null  and courseName != ''"> and c.name like concat('%', #{courseName}, '%')</if>
+            <if test="coachName != null  and coachName != ''"> and u.name like concat('%', #{coachName}, '%')</if>
+            and s.is_deleted = 0
+        </where>
+        group by s.id, s.course_id, s.coach_id, s.start_time, s.end_time, s.location, s.max_capacity, s.status, 
+                 s.create_by, s.create_time, s.update_by, s.update_time, s.remark, s.is_deleted, s.delete_time,
+                 c.name, u.name
+        order by s.start_time desc
+    </select>
+
+    <!-- 根据排班ID查询排班详情（包含预约人数） -->
+    <select id="selectGymScheduleByIdWithBooking" parameterType="Long" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleWithBookingVo"/>
+        where s.id = #{id} and s.is_deleted = 0
+        group by s.id, s.course_id, s.coach_id, s.start_time, s.end_time, s.location, s.max_capacity, s.status, 
+                 s.create_by, s.create_time, s.update_by, s.update_time, s.remark, s.is_deleted, s.delete_time,
+                 c.name, u.name
+    </select>
+
+    <!-- 根据课程ID查询排班列表（包含预约人数） -->
+    <select id="selectGymScheduleByCourseIdWithBooking" parameterType="Long" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleWithBookingVo"/>
+        where s.course_id = #{courseId} and s.is_deleted = 0
+        group by s.id, s.course_id, s.coach_id, s.start_time, s.end_time, s.location, s.max_capacity, s.status, 
+                 s.create_by, s.create_time, s.update_by, s.update_time, s.remark, s.is_deleted, s.delete_time,
+                 c.name, u.name
+        order by s.start_time
+    </select>
+
+    <!-- 根据教练ID查询排班列表（包含预约人数） -->
+    <select id="selectGymScheduleByCoachIdWithBooking" parameterType="Long" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleWithBookingVo"/>
+        where s.coach_id = #{coachId} and s.is_deleted = 0
+        group by s.id, s.course_id, s.coach_id, s.start_time, s.end_time, s.location, s.max_capacity, s.status, 
+                 s.create_by, s.create_time, s.update_by, s.update_time, s.remark, s.is_deleted, s.delete_time,
+                 c.name, u.name
+        order by s.start_time
+    </select>
+
+    <!-- 查询今日排班（包含预约人数） -->
+    <select id="selectTodaySchedulesWithBooking" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleWithBookingVo"/>
+        where s.is_deleted = 0 
+        and date(s.start_time) = curdate()
+        group by s.id, s.course_id, s.coach_id, s.start_time, s.end_time, s.location, s.max_capacity, s.status, 
+                 s.create_by, s.create_time, s.update_by, s.update_time, s.remark, s.is_deleted, s.delete_time,
+                 c.name, u.name
         order by s.start_time
     </select>
 

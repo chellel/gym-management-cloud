@@ -220,4 +220,63 @@ public class GymScheduleServiceImpl implements IGymScheduleService
         
         return true;
     }
+
+    /**
+     * 根据条件分页查询排班列表（包含预约人数）
+     * 
+     * @param gymSchedule 排班信息
+     * @return 排班信息集合信息
+     */
+    @Override
+    public List<GymSchedule> selectGymScheduleListWithBooking(GymSchedule gymSchedule)
+    {
+        return gymScheduleMapper.selectGymScheduleListWithBooking(gymSchedule);
+    }
+
+    /**
+     * 通过排班ID查询排班（包含预约人数）
+     * 
+     * @param id 排班ID
+     * @return 排班对象信息
+     */
+    @Override
+    public GymSchedule selectGymScheduleByIdWithBooking(Long id)
+    {
+        return gymScheduleMapper.selectGymScheduleByIdWithBooking(id);
+    }
+
+    /**
+     * 通过课程ID查询排班列表（包含预约人数）
+     * 
+     * @param courseId 课程ID
+     * @return 排班信息集合
+     */
+    @Override
+    public List<GymSchedule> selectGymScheduleByCourseIdWithBooking(Long courseId)
+    {
+        return gymScheduleMapper.selectGymScheduleByCourseIdWithBooking(courseId);
+    }
+
+    /**
+     * 通过教练ID查询排班列表（包含预约人数）
+     * 
+     * @param coachId 教练ID
+     * @return 排班信息集合
+     */
+    @Override
+    public List<GymSchedule> selectGymScheduleByCoachIdWithBooking(Long coachId)
+    {
+        return gymScheduleMapper.selectGymScheduleByCoachIdWithBooking(coachId);
+    }
+
+    /**
+     * 查询今日排班（包含预约人数）
+     * 
+     * @return 排班信息集合
+     */
+    @Override
+    public List<GymSchedule> selectTodaySchedulesWithBooking()
+    {
+        return gymScheduleMapper.selectTodaySchedulesWithBooking();
+    }
 }

@@ -67,6 +67,9 @@ public class GymSchedule extends BaseEntity
     /** 教练姓名 */
     private String coachName;
 
+    /** 预约人数 */
+    private Integer bookingCount;
+
     public Long getId()
     {
         return id;
@@ -187,6 +190,16 @@ public class GymSchedule extends BaseEntity
         this.coachName = coachName;
     }
 
+    public Integer getBookingCount()
+    {
+        return bookingCount;
+    }
+
+    public void setBookingCount(Integer bookingCount)
+    {
+        this.bookingCount = bookingCount;
+    }
+
     @Override
     public String toString()
     {
@@ -208,6 +221,7 @@ public class GymSchedule extends BaseEntity
             .append("deleteTime", getDeleteTime())
             .append("courseName", getCourseName())
             .append("coachName", getCoachName())
+            .append("bookingCount", getBookingCount())
             .toString();
     }
 }
