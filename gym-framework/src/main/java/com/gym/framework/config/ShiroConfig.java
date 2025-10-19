@@ -332,7 +332,7 @@ public class ShiroConfig
         shiroFilterFactoryBean.setFilters(filters);
 
         // 所有请求需要认证
-        filterChainDefinitionMap.put("/**", "user,kickout,onlineSession,syncOnlineSession,csrfValidateFilter");
+//        filterChainDefinitionMap.put("/**", "user,kickout,onlineSession,syncOnlineSession,csrfValidateFilter");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 
         return shiroFilterFactoryBean;

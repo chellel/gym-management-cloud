@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.system.mapper.GymScheduleMapper">
+    
+    <resultMap type="GymSchedule" id="GymScheduleResult">
+        <result property="id"               column="id"                />
+        <result property="courseId"         column="course_id"         />
+        <result property="coachId"          column="coach_id"          />
+        <result property="startTime"        column="start_time"        />
+        <result property="endTime"          column="end_time"          />
+        <result property="location"         column="location"         />
+        <result property="maxCapacity"      column="max_capacity"      />
+        <result property="status"           column="status"            />
+        <result property="createBy"         column="create_by"         />
+        <result property="createTime"       column="create_time"       />
+        <result property="updateBy"         column="update_by"         />
+        <result property="updateTime"       column="update_time"       />
+        <result property="remark"           column="remark"            />
+        <result property="isDeleted"        column="is_deleted"        />
+        <result property="deleteTime"       column="delete_time"       />
+        <result property="courseName"       column="course_name"       />
+        <result property="coachName"        column="coach_name"       />
+    </resultMap>
+
+    <sql id="selectGymScheduleVo">
+        select s.id, s.course_id, s.coach_id, s.start_time, s.end_time, s.location, s.max_capacity, s.status, 
+               s.create_by, s.create_time, s.update_by, s.update_time, s.remark, s.is_deleted, s.delete_time,
+               c.name as course_name, u.name as coach_name
+        from gym_schedule s
+        left join gym_course c on s.course_id = c.id
+        left join gym_user u on s.coach_id = u.id
+    </sql>
+
+    <select id="selectGymScheduleList" parameterType="GymSchedule" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleVo"/>
+        <where>  
+            <if test="courseId != null "> and s.course_id = #{courseId}</if>
+            <if test="coachId != null "> and s.coach_id = #{coachId}</if>
+            <if test="location != null  and location != ''"> and s.location like concat('%', #{location}, '%')</if>
+            <if test="status != null  and status != ''"> and s.status = #{status}</if>
+            <if test="startTime != null "> and s.start_time &gt;= #{startTime}</if>
+            <if test="endTime != null "> and s.end_time &lt;= #{endTime}</if>
+            <if test="courseName != null  and courseName != ''"> and c.name like concat('%', #{courseName}, '%')</if>
+            <if test="coachName != null  and coachName != ''"> and u.name like concat('%', #{coachName}, '%')</if>
+            and s.is_deleted = 0
+        </where>
+        order by s.start_time desc
+    </select>
+    
+    <select id="selectGymScheduleById" parameterType="Long" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleVo"/>
+        where s.id = #{id} and s.is_deleted = 0
+    </select>
+
+    <select id="selectGymScheduleByCourseId" parameterType="Long" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleVo"/>
+        where s.course_id = #{courseId} and s.is_deleted = 0
+        order by s.start_time
+    </select>
+
+    <select id="selectGymScheduleByCoachId" parameterType="Long" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleVo"/>
+        where s.coach_id = #{coachId} and s.is_deleted = 0
+        order by s.start_time
+    </select>
+
+    <select id="selectGymScheduleByTimeRange" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleVo"/>
+        where s.is_deleted = 0
+        <if test="startTime != null">
+            and s.start_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            and s.end_time &lt;= #{endTime}
+        </if>
+        order by s.start_time
+    </select>
+
+    <select id="checkCoachTimeConflict" resultType="int">
+        select count(1) from gym_schedule 
+        where coach_id = #{coachId} 
+        and is_deleted = 0 
+        and status != 'cancelled'
+        <if test="excludeId != null">
+            and id != #{excludeId}
+        </if>
+        and (
+            (start_time &lt; #{endTime} and end_time &gt; #{startTime})
+        )
+    </select>
+        
+    <insert id="insertGymSchedule" parameterType="GymSchedule" useGeneratedKeys="true" keyProperty="id">
+        insert into gym_schedule
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">course_id,</if>
+            <if test="coachId != null">coach_id,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="location != null and location != ''">location,</if>
+            <if test="maxCapacity != null">max_capacity,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="deleteTime != null">delete_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">#{courseId},</if>
+            <if test="coachId != null">#{coachId},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="location != null and location != ''">#{location},</if>
+            <if test="maxCapacity != null">#{maxCapacity},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="deleteTime != null">#{deleteTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateGymSchedule" parameterType="GymSchedule">
+        update gym_schedule
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="coachId != null">coach_id = #{coachId},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="location != null and location != ''">location = #{location},</if>
+            <if test="maxCapacity != null">max_capacity = #{maxCapacity},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="deleteTime != null">delete_time = #{deleteTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateGymScheduleStatus" parameterType="map">
+        update gym_schedule set status = #{status}, update_time = now() where id = #{id}
+    </update>
+
+    <update id="deleteGymScheduleById" parameterType="Long">
+        update gym_schedule set is_deleted = 1, delete_time = now() where id = #{id}
+    </update>
+
+    <update id="deleteGymScheduleByIds" parameterType="String">
+        update gym_schedule set is_deleted = 1, delete_time = now() where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="selectTodaySchedules" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleVo"/>
+        where s.is_deleted = 0 
+        and date(s.start_time) = curdate()
+        order by s.start_time
+    </select>
+
+    <select id="selectUpcomingSchedules" resultMap="GymScheduleResult">
+        <include refid="selectGymScheduleVo"/>
+        where s.is_deleted = 0 
+        and s.status = 'waiting'
+        and s.start_time between now() and date_add(now(), interval 1 hour)
+        order by s.start_time
+    </select>
+
+</mapper>
