@@ -26,22 +26,13 @@ import com.gym.system.service.IGymScheduleService;
 @RequestMapping("/system/gymschedule")
 public class GymScheduleController extends BaseController
 {
-    private String prefix = "system/gymschedule";
-
     @Autowired
     private IGymScheduleService gymScheduleService;
-
-    @RequiresPermissions("system:gymschedule:view")
-    @GetMapping()
-    public String gymschedule()
-    {
-        return prefix + "/gymschedule";
-    }
 
     /**
      * 查询排班列表
      */
-    @RequiresPermissions("system:gymschedule:li÷st")
+//    @RequiresPermissions("system:gymschedule:list")
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(GymSchedule gymSchedule)
@@ -49,15 +40,6 @@ public class GymScheduleController extends BaseController
         startPage();
         List<GymSchedule> list = gymScheduleService.selectGymScheduleList(gymSchedule);
         return getDataTable(list);
-    }
-
-    /**
-     * 新增排班
-     */
-    @GetMapping("/add")
-    public String add()
-    {
-        return prefix + "/add";
     }
 
     /**
@@ -84,7 +66,6 @@ public class GymScheduleController extends BaseController
         return toAjax(gymScheduleService.insertGymSchedule(gymSchedule));
     }
 
-
     /**
      * 获取排班详情
      */
@@ -94,13 +75,13 @@ public class GymScheduleController extends BaseController
     public AjaxResult getScheduleDetail(@PathVariable("id") Long id)
     {
         GymSchedule gymSchedule = gymScheduleService.selectGymScheduleById(id);
-        return AjaxResult.success(gymSchedule);
+        return success(gymSchedule);
     }
 
     /**
      * 修改保存排班
      */
-    @RequiresPermissions("system:gymschedule:edit")
+//    @RequiresPermissions("system:gymschedule:edit")
     @Log(title = "排班管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
@@ -209,5 +190,134 @@ public class GymScheduleController extends BaseController
     {
         List<GymSchedule> schedules = gymScheduleService.selectGymScheduleByCoachId(coachId);
         return success(schedules);
+    }
+
+    // ========== REST API 接口 ==========
+
+    /**
+     * 根据时间范围获取排班列表
+     */
+    @PostMapping("/timeRange")
+    @ResponseBody
+    public AjaxResult getSchedulesByTimeRange(@RequestParam String startTimeStr, @RequestParam String endTimeStr)
+    {
+        try
+        {
+            Date startTime = DateUtils.parseDate(startTimeStr, "yyyy-MM-dd HH:mm:ss");
+            Date endTime = DateUtils.parseDate(endTimeStr, "yyyy-MM-dd HH:mm:ss");
+            List<GymSchedule> schedules = gymScheduleService.selectGymScheduleByTimeRange(startTime, endTime);
+            return success(schedules);
+        }
+        catch (Exception e)
+        {
+            return error("时间格式错误");
+        }
+    }
+
+    /**
+     * REST API - 新增排班
+     */
+    @PostMapping("/api")
+    @ResponseBody
+    public AjaxResult addApi(@RequestBody GymSchedule gymSchedule)
+    {
+        // 验证时间是否合理
+        if (!gymScheduleService.validateScheduleTime(gymSchedule.getStartTime(), gymSchedule.getEndTime()))
+        {
+            return error("排班时间设置不合理，请检查开始时间和结束时间");
+        }
+
+        // 检查教练时间冲突
+        if (gymScheduleService.checkCoachTimeConflict(gymSchedule.getCoachId(), gymSchedule.getStartTime(), gymSchedule.getEndTime(), null))
+        {
+            return error("教练在该时间段已有其他排班，请选择其他时间");
+        }
+
+        return toAjax(gymScheduleService.insertGymSchedule(gymSchedule));
+    }
+
+    /**
+     * REST API - 修改排班
+     */
+    @PutMapping("/api")
+    @ResponseBody
+    public AjaxResult editApi(@RequestBody GymSchedule gymSchedule)
+    {
+        // 验证时间是否合理
+        if (!gymScheduleService.validateScheduleTime(gymSchedule.getStartTime(), gymSchedule.getEndTime()))
+        {
+            return error("排班时间设置不合理，请检查开始时间和结束时间");
+        }
+
+        // 检查教练时间冲突（排除自己）
+        if (gymScheduleService.checkCoachTimeConflict(gymSchedule.getCoachId(), gymSchedule.getStartTime(), gymSchedule.getEndTime(), gymSchedule.getId()))
+        {
+            return error("教练在该时间段已有其他排班，请选择其他时间");
+        }
+
+        return toAjax(gymScheduleService.updateGymSchedule(gymSchedule));
+    }
+
+    /**
+     * REST API - 删除排班
+     */
+    @DeleteMapping("/api/{ids}")
+    @ResponseBody
+    public AjaxResult removeApi(@PathVariable String ids)
+    {
+        return toAjax(gymScheduleService.deleteGymScheduleByIds(ids));
+    }
+
+    /**
+     * REST API - 修改排班状态
+     */
+    @PutMapping("/api/status")
+    @ResponseBody
+    public AjaxResult changeStatusApi(@RequestParam Long id, @RequestParam String status)
+    {
+        boolean result = gymScheduleService.updateGymScheduleStatus(id, status);
+        return result ? success() : error("状态修改失败");
+    }
+
+    /**
+     * REST API - 检查教练时间冲突
+     */
+    @PostMapping("/api/checkConflict")
+    @ResponseBody
+    public AjaxResult checkCoachTimeConflictApi(@RequestParam Long coachId, @RequestParam String startTimeStr, @RequestParam String endTimeStr, @RequestParam(required = false) Long excludeId)
+    {
+        try
+        {
+            Date startTime = DateUtils.parseDate(startTimeStr, "yyyy-MM-dd HH:mm:ss");
+            Date endTime = DateUtils.parseDate(endTimeStr, "yyyy-MM-dd HH:mm:ss");
+            
+            boolean hasConflict = gymScheduleService.checkCoachTimeConflict(coachId, startTime, endTime, excludeId);
+            return success(hasConflict);
+        }
+        catch (Exception e)
+        {
+            return error("时间格式错误");
+        }
+    }
+
+    /**
+     * REST API - 验证排班时间
+     */
+    @PostMapping("/api/validateTime")
+    @ResponseBody
+    public AjaxResult validateScheduleTimeApi(@RequestParam String startTimeStr, @RequestParam String endTimeStr)
+    {
+        try
+        {
+            Date startTime = DateUtils.parseDate(startTimeStr, "yyyy-MM-dd HH:mm:ss");
+            Date endTime = DateUtils.parseDate(endTimeStr, "yyyy-MM-dd HH:mm:ss");
+            
+            boolean isValid = gymScheduleService.validateScheduleTime(startTime, endTime);
+            return success(isValid);
+        }
+        catch (Exception e)
+        {
+            return error("时间格式错误");
+        }
     }
 }

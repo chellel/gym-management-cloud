@@ -24,17 +24,8 @@ import com.gym.system.service.IGymCourseService;
 @RequestMapping("/system/gymcourse")
 public class GymCourseController extends BaseController
 {
-    private String prefix = "system/gymcourse";
-
     @Autowired
     private IGymCourseService gymCourseService;
-
-    @RequiresPermissions("system:gymcourse:view")
-    @GetMapping()
-    public String gymcourse()
-    {
-        return prefix + "/gymcourse";
-    }
 
     /**
      * 查询课程列表
@@ -47,16 +38,6 @@ public class GymCourseController extends BaseController
         startPage();
         List<GymCourse> list = gymCourseService.selectGymCourseList(gymCourse);
         return getDataTable(list);
-    }
-
-
-    /**
-     * 新增课程
-     */
-    @GetMapping("/add")
-    public String add()
-    {
-        return prefix + "/add";
     }
 
     /**
@@ -84,7 +65,7 @@ public class GymCourseController extends BaseController
     public AjaxResult getCourseDetail(@PathVariable("id") Long id)
     {
         GymCourse gymCourse = gymCourseService.selectGymCourseById(id);
-        return AjaxResult.success(gymCourse);
+        return success(gymCourse);
     }
 
     /**
@@ -134,5 +115,77 @@ public class GymCourseController extends BaseController
     {
         List<GymCourse> courses = gymCourseService.selectAllValidCourses();
         return success(courses);
+    }
+
+    // ========== REST API 接口 ==========
+
+    /**
+     * 根据课程名称获取详细信息
+     */
+    @GetMapping("/name/{name}")
+    @ResponseBody
+    public AjaxResult getInfoByName(@PathVariable("name") String name)
+    {
+        return success(gymCourseService.selectGymCourseByName(name));
+    }
+
+    /**
+     * REST API - 新增课程
+     */
+    @PostMapping("/api")
+    @ResponseBody
+    public AjaxResult addApi(@RequestBody GymCourse gymCourse)
+    {
+        if (!gymCourseService.checkCourseNameUnique(gymCourse))
+        {
+            return error("新增课程'" + gymCourse.getName() + "'失败，课程名称已存在");
+        }
+        return toAjax(gymCourseService.insertGymCourse(gymCourse));
+    }
+
+    /**
+     * REST API - 修改课程
+     */
+    @PutMapping("/api")
+    @ResponseBody
+    public AjaxResult editApi(@RequestBody GymCourse gymCourse)
+    {
+        if (!gymCourseService.checkCourseNameUnique(gymCourse))
+        {
+            return error("修改课程'" + gymCourse.getName() + "'失败，课程名称已存在");
+        }
+        return toAjax(gymCourseService.updateGymCourse(gymCourse));
+    }
+
+    /**
+     * REST API - 删除课程
+     */
+    @DeleteMapping("/api/{ids}")
+    @ResponseBody
+    public AjaxResult removeApi(@PathVariable String ids)
+    {
+        return toAjax(gymCourseService.deleteGymCourseByIds(ids));
+    }
+
+    /**
+     * REST API - 获取所有有效课程
+     */
+    @GetMapping("/api/valid")
+    @ResponseBody
+    public AjaxResult getAllValidCoursesApi()
+    {
+        List<GymCourse> courses = gymCourseService.selectAllValidCourses();
+        return success(courses);
+    }
+
+    /**
+     * REST API - 校验课程名称是否唯一
+     */
+    @PostMapping("/api/checkNameUnique")
+    @ResponseBody
+    public AjaxResult checkCourseNameUniqueApi(@RequestBody GymCourse gymCourse)
+    {
+        boolean isUnique = gymCourseService.checkCourseNameUnique(gymCourse);
+        return success(isUnique);
     }
 }

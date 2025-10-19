@@ -27,22 +27,12 @@ import com.gym.system.service.IGymUserService;
 @RequestMapping("/system/gymuser")
 public class GymUserController extends BaseController
 {
-    private String prefix = "system/gymuser";
-
     @Autowired
     private IGymUserService gymUserService;
-
-    // @RequiresPermissions("system:gymuser:view")
-    @GetMapping()
-    public String gymuser()
-    {
-        return prefix + "/gymuser";
-    }
 
     /**
      * 查询会员列表
      */
-    // @RequiresPermissions("system:gymuser:list")
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(GymUser gymUser)
@@ -56,7 +46,6 @@ public class GymUserController extends BaseController
      * 导出会员列表
      */
     @Log(title = "会员管理", businessType = BusinessType.EXPORT)
-    // @RequiresPermissions("system:gymuser:export")
     @PostMapping("/export")
     @ResponseBody
     public AjaxResult export(GymUser gymUser)
@@ -79,24 +68,6 @@ public class GymUserController extends BaseController
         List<GymUser> gymUserList = util.importExcel(file.getInputStream());
         String message = gymUserService.importGymUser(gymUserList, updateSupport, getLoginName());
         return AjaxResult.success(message);
-    }
-
-    @RequiresPermissions("system:gymuser:view")
-    @GetMapping("/importTemplate")
-    @ResponseBody
-    public AjaxResult importTemplate()
-    {
-        ExcelUtil<GymUser> util = new ExcelUtil<GymUser>(GymUser.class);
-        return util.importTemplateExcel("会员数据");
-    }
-
-    /**
-     * 新增会员
-     */
-    @GetMapping("/add")
-    public String add()
-    {
-        return prefix + "/add";
     }
 
     /**
@@ -124,26 +95,16 @@ public class GymUserController extends BaseController
         return toAjax(gymUserService.insertGymUser(gymUser));
     }
 
-    /**
-     * 修改会员
+     /**
+     * 获取会员详情
      */
-    @RequiresPermissions("system:gymuser:edit")
-    @GetMapping("/edit/{id}")
-    public String edit(@PathVariable("id") Long id, ModelMap mmap)
+    // @RequiresPermissions("system:gymcourse:view")
+    @GetMapping("/{id}")
+    @ResponseBody
+    public AjaxResult getUserDetail(@PathVariable("id") Long id)
     {
-        mmap.put("gymUser", gymUserService.selectGymUserById(id));
-        return prefix + "/edit";
-    }
-
-    /**
-     * 查询会员详细
-     */
-    @RequiresPermissions("system:gymuser:list")
-    @GetMapping("/view/{id}")
-    public String view(@PathVariable("id") Long id, ModelMap mmap)
-    {
-        mmap.put("gymUser", gymUserService.selectGymUserById(id));
-        return prefix + "/view";
+        GymUser gymUser = gymUserService.selectGymUserById(id);
+        return success(gymUser);
     }
 
     /**
@@ -198,7 +159,7 @@ public class GymUserController extends BaseController
     public String resetPwd(@PathVariable("id") Long id, ModelMap mmap)
     {
         mmap.put("gymUser", gymUserService.selectGymUserById(id));
-        return prefix + "/resetPwd";
+        return "system/gymuser/resetPwd";
     }
 
     /**
@@ -253,5 +214,151 @@ public class GymUserController extends BaseController
     public boolean checkEmailUnique(GymUser gymUser)
     {
         return gymUserService.checkEmailUnique(gymUser);
+    }
+
+    // ========== REST API 接口 ==========
+
+    /**
+     * 根据用户编号获取详细信息
+     */
+    @GetMapping("/userId/{userId}")
+    @ResponseBody
+    public AjaxResult getInfoByUserId(@PathVariable("userId") String userId)
+    {
+        return success(gymUserService.selectGymUserByUserId(userId));
+    }
+
+    /**
+     * 根据手机号获取详细信息
+     */
+    @GetMapping("/phone/{phone}")
+    @ResponseBody
+    public AjaxResult getInfoByPhone(@PathVariable("phone") String phone)
+    {
+        return success(gymUserService.selectGymUserByPhone(phone));
+    }
+
+    /**
+     * 根据邮箱获取详细信息
+     */
+    @GetMapping("/email/{email}")
+    @ResponseBody
+    public AjaxResult getInfoByEmail(@PathVariable("email") String email)
+    {
+        return success(gymUserService.selectGymUserByEmail(email));
+    }
+
+    /**
+     * REST API - 新增会员
+     */
+    @PostMapping("/api")
+    @ResponseBody
+    public AjaxResult addApi(@RequestBody GymUser gymUser)
+    {
+        if (!gymUserService.checkUserIdUnique(gymUser))
+        {
+            return error("新增会员'" + gymUser.getUserId() + "'失败，用户编号已存在");
+        }
+        else if (StringUtils.isNotEmpty(gymUser.getPhone()) && !gymUserService.checkPhoneUnique(gymUser))
+        {
+            return error("新增会员'" + gymUser.getUserId() + "'失败，手机号码已存在");
+        }
+        else if (StringUtils.isNotEmpty(gymUser.getEmail()) && !gymUserService.checkEmailUnique(gymUser))
+        {
+            return error("新增会员'" + gymUser.getUserId() + "'失败，邮箱账号已存在");
+        }
+        gymUser.setCreateBy(getLoginName());
+        return toAjax(gymUserService.insertGymUser(gymUser));
+    }
+
+    /**
+     * REST API - 修改会员
+     */
+    @PutMapping("/api")
+    @ResponseBody
+    public AjaxResult editApi(@RequestBody GymUser gymUser)
+    {
+        if (!gymUserService.checkUserIdUnique(gymUser))
+        {
+            return error("修改会员'" + gymUser.getUserId() + "'失败，用户编号已存在");
+        }
+        else if (StringUtils.isNotEmpty(gymUser.getPhone()) && !gymUserService.checkPhoneUnique(gymUser))
+        {
+            return error("修改会员'" + gymUser.getUserId() + "'失败，手机号码已存在");
+        }
+        else if (StringUtils.isNotEmpty(gymUser.getEmail()) && !gymUserService.checkEmailUnique(gymUser))
+        {
+            return error("修改会员'" + gymUser.getUserId() + "'失败，邮箱账号已存在");
+        }
+        gymUser.setUpdateBy(getLoginName());
+        return toAjax(gymUserService.updateGymUser(gymUser));
+    }
+
+    /**
+     * REST API - 删除会员
+     */
+    @PostMapping("/api/remove")
+    @ResponseBody
+    public AjaxResult removeApi(@RequestBody Long[] ids)
+    {
+        try
+        {
+            String idsStr = String.join(",", java.util.Arrays.stream(ids).map(String::valueOf).toArray(String[]::new));
+            return toAjax(gymUserService.deleteGymUserByIds(idsStr));
+        }
+        catch (Exception e)
+        {
+            return error(e.getMessage());
+        }
+    }
+
+    /**
+     * REST API - 修改会员状态
+     */
+    @PostMapping("/api/changeStatus")
+    @ResponseBody
+    public AjaxResult changeStatusApi(@RequestBody GymUser gymUser)
+    {
+        return toAjax(gymUserService.updateGymUserStatus(gymUser.getId(), gymUser.getStatus()));
+    }
+
+    /**
+     * REST API - 重置会员密码
+     */
+    @PostMapping("/api/resetPwd")
+    @ResponseBody
+    public AjaxResult resetPwdApi(@RequestBody GymUser gymUser)
+    {
+        return toAjax(gymUserService.resetGymUserPwd(gymUser));
+    }
+
+    /**
+     * REST API - 校验用户编号是否唯一
+     */
+    @PostMapping("/api/checkUserIdUnique")
+    @ResponseBody
+    public AjaxResult checkUserIdUniqueApi(@RequestBody GymUser gymUser)
+    {
+        return success(gymUserService.checkUserIdUnique(gymUser));
+    }
+
+    /**
+     * REST API - 校验手机号码是否唯一
+     */
+    @PostMapping("/api/checkPhoneUnique")
+    @ResponseBody
+    public AjaxResult checkPhoneUniqueApi(@RequestBody GymUser gymUser)
+    {
+        return success(gymUserService.checkPhoneUnique(gymUser));
+    }
+
+    /**
+     * REST API - 校验邮箱是否唯一
+     */
+    @PostMapping("/api/checkEmailUnique")
+    @ResponseBody
+    public AjaxResult checkEmailUniqueApi(@RequestBody GymUser gymUser)
+    {
+        return success(gymUserService.checkEmailUnique(gymUser));
     }
 }
