@@ -34,9 +34,11 @@ public class GymScheduleController extends BaseController
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(GymSchedule gymSchedule)
+    public TableDataInfo list(@RequestBody GymSchedule gymSchedule, 
+                             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
+                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
     {
-        startPage();
+        startPage(page, pageSize);
         List<GymSchedule> list = gymScheduleService.selectGymScheduleListWithBooking(gymSchedule);
         return getDataTable(list);
     }

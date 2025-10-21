@@ -78,6 +78,11 @@ public class ShiroConstants
     public static final String LOGIN_RECORD_CACHE = "loginRecordCache";
 
     /**
+     * 管理员登录记录缓存
+     */
+    public static final String ADMIN_LOGIN_RECORD_CACHE = "adminLoginRecordCache";
+
+    /**
      * 系统活跃用户缓存
      */
     public static final String SYS_USERCACHE = "sys-userCache";

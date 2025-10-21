@@ -3,6 +3,7 @@ package com.gym.web.controller.system;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -33,28 +34,22 @@ import com.gym.system.service.IGymUserService;
 @RequestMapping("/system/gymmember")
 public class GymMemberController extends BaseController
 {
-    private String prefix = "system/gymmember";
-
     @Autowired
     private IGymUserService gymUserService;
 
     @Autowired
     private IGymMembershipService gymMembershipService;
 
-    @GetMapping()
-    public String gymmember()
-    {
-        return prefix + "/gymmember";
-    }
-
     /**
      * 查询会员列表（联表查询）
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(GymMemberDTO gymMemberDTO)
+    public TableDataInfo list(@RequestBody GymMemberDTO gymMemberDTO, 
+                             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
+                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
     {
-        startPage();
+        startPage(page, pageSize);
         List<GymMemberDTO> list = gymMembershipService.selectGymMemberList(gymMemberDTO);
         return getDataTable(list);
     }
@@ -63,6 +58,7 @@ public class GymMemberController extends BaseController
      * 导出会员列表
      */
     @Log(title = "会员管理", businessType = BusinessType.EXPORT)
+    // @RequiresPermissions("system:gymmember:export")
     @PostMapping("/export")
     @ResponseBody
     public AjaxResult export(GymMemberDTO gymMemberDTO)
@@ -73,17 +69,9 @@ public class GymMemberController extends BaseController
     }
 
     /**
-     * 新增会员
-     */
-    @GetMapping("/add")
-    public String add()
-    {
-        return prefix + "/add";
-    }
-
-    /**
      * 新增保存会员
      */
+    // @RequiresPermissions("system:gymmember:add")
     @Log(title = "会员管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
@@ -116,69 +104,9 @@ public class GymMemberController extends BaseController
     }
 
     /**
-     * 修改会员
-     */
-    @GetMapping("/edit/{membershipId}")
-    public String edit(@PathVariable("membershipId") Long membershipId, ModelMap mmap)
-    {
-        GymMembership gymMembership = gymMembershipService.selectGymMembershipById(membershipId);
-        GymUser gymUser = gymUserService.selectGymUserById(gymMembership.getUserId());
-        
-        GymMemberDTO gymMemberDTO = new GymMemberDTO();
-        gymMemberDTO.setUserId(gymUser.getUserId());
-        gymMemberDTO.setUserCode(gymUser.getUserId());
-        gymMemberDTO.setUserName(gymUser.getName());
-        gymMemberDTO.setPhone(gymUser.getPhone());
-        gymMemberDTO.setEmail(gymUser.getEmail());
-        gymMemberDTO.setGender(gymUser.getGender());
-        gymMemberDTO.setBirthDate(gymUser.getBirthDate());
-        gymMemberDTO.setRole(gymUser.getRole());
-        gymMemberDTO.setUserStatus(gymUser.getStatus());
-        gymMemberDTO.setMembershipId(gymMembership.getId());
-        gymMemberDTO.setMembershipType(gymMembership.getMembershipType());
-        gymMemberDTO.setMembershipStartDate(gymMembership.getStartDate());
-        gymMemberDTO.setMembershipExpireDate(gymMembership.getExpireDate());
-        gymMemberDTO.setMembershipStatus(gymMembership.getStatus());
-        gymMemberDTO.setRemark(gymMembership.getRemark());
-        gymMembership.setUpdateBy(getLoginName());
-        gymMembership.setUpdateTime(DateUtils.getNowDate());
-        mmap.put("gymMember", gymMemberDTO);
-        return prefix + "/edit";
-    }
-
-    /**
-     * 查询会员详细
-     */
-    @GetMapping("/view/{membershipId}")
-    public String view(@PathVariable("membershipId") Long membershipId, ModelMap mmap)
-    {
-        GymMembership gymMembership = gymMembershipService.selectGymMembershipById(membershipId);
-        GymUser gymUser = gymUserService.selectGymUserById(gymMembership.getUserId());
-        
-        GymMemberDTO gymMemberDTO = new GymMemberDTO();
-        gymMemberDTO.setUserId(gymUser.getUserId());
-        gymMemberDTO.setUserCode(gymUser.getUserId());
-        gymMemberDTO.setUserName(gymUser.getName());
-        gymMemberDTO.setPhone(gymUser.getPhone());
-        gymMemberDTO.setEmail(gymUser.getEmail());
-        gymMemberDTO.setGender(gymUser.getGender());
-        gymMemberDTO.setBirthDate(gymUser.getBirthDate());
-        gymMemberDTO.setRole(gymUser.getRole());
-        gymMemberDTO.setUserStatus(gymUser.getStatus());
-        gymMemberDTO.setMembershipId(gymMembership.getId());
-        gymMemberDTO.setMembershipType(gymMembership.getMembershipType());
-        gymMemberDTO.setMembershipStartDate(gymMembership.getStartDate());
-        gymMemberDTO.setMembershipExpireDate(gymMembership.getExpireDate());
-        gymMemberDTO.setMembershipStatus(gymMembership.getStatus());
-        gymMemberDTO.setRemark(gymMembership.getRemark());
-
-        mmap.put("gymMember", gymMemberDTO);
-        return prefix + "/view";
-    }
-
-    /**
      * 修改保存会员
      */
+    // @RequiresPermissions("system:gymmember:edit")
     @Log(title = "会员管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
@@ -203,6 +131,7 @@ public class GymMemberController extends BaseController
     /**
      * 删除会员
      */
+    @RequiresPermissions("system:gymmember:remove")
     @Log(title = "会员管理", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
@@ -214,6 +143,7 @@ public class GymMemberController extends BaseController
     /**
      * 修改会员状态
      */
+    // @RequiresPermissions("system:gymmember:edit")
     @Log(title = "会员管理", businessType = BusinessType.UPDATE)
     @PostMapping("/changeStatus")
     @ResponseBody
@@ -225,6 +155,7 @@ public class GymMemberController extends BaseController
     /**
      * 续费会员
      */
+    // @RequiresPermissions("system:gymmember:edit")
     @Log(title = "会员续费", businessType = BusinessType.UPDATE)
     @PostMapping("/renew")
     @ResponseBody
@@ -248,6 +179,7 @@ public class GymMemberController extends BaseController
     /**
      * 查询即将过期的会员
      */
+    // @RequiresPermissions("system:gymmember:list")
     @PostMapping("/expiring")
     @ResponseBody
     public TableDataInfo expiring(@RequestParam(defaultValue = "7") int days)
@@ -260,6 +192,7 @@ public class GymMemberController extends BaseController
     /**
      * 查询已过期的会员
      */
+    // @RequiresPermissions("system:gymmember:list")
     @PostMapping("/expired")
     @ResponseBody
     public TableDataInfo expired()
@@ -272,6 +205,7 @@ public class GymMemberController extends BaseController
     /**
      * 根据会籍ID获取详细信息
      */
+    // @RequiresPermissions("system:gymmember:list")
     @GetMapping(value = "/{membershipId}")
     @ResponseBody
     public AjaxResult getInfo(@PathVariable("membershipId") Long membershipId)
@@ -306,6 +240,7 @@ public class GymMemberController extends BaseController
     /**
      * 根据用户ID获取会籍列表
      */
+    // @RequiresPermissions("system:gymmember:list")
     @GetMapping(value = "/user/{userId}")
     @ResponseBody
     public AjaxResult getMembershipsByUserId(@PathVariable("userId") Long userId)
@@ -317,6 +252,7 @@ public class GymMemberController extends BaseController
     /**
      * 根据用户编号获取当前有效会籍
      */
+    // @RequiresPermissions("system:gymmember:list")
     @GetMapping(value = "/active/{userCode}")
     @ResponseBody
     public AjaxResult getActiveMembershipByUserCode(@PathVariable("userCode") String userCode)
@@ -334,6 +270,7 @@ public class GymMemberController extends BaseController
     /**
      * 检查用户是否有有效会籍
      */
+    // @RequiresPermissions("system:gymmember:list")
     @PostMapping("/checkActiveMembership")
     @ResponseBody
     public AjaxResult checkActiveMembership(@RequestParam Long userId)
@@ -345,6 +282,7 @@ public class GymMemberController extends BaseController
     /**
      * 获取会员统计数据
      */
+    // @RequiresPermissions("system:gymmember:list")
     @GetMapping("/stats/summary")
     @ResponseBody
     public AjaxResult getMemberStatistics()

@@ -34,9 +34,11 @@ public class GymBookingController extends BaseController
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(GymBooking gymBooking)
+    public TableDataInfo list(@RequestBody GymBooking gymBooking,
+                             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
+                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
     {
-        startPage();
+        startPage(page, pageSize);
         List<GymBooking> list = gymBookingService.selectGymBookingList(gymBooking);
         return getDataTable(list);
     }

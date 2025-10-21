@@ -31,7 +31,7 @@ public class GymCourseController extends BaseController
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(GymCourse gymCourse, 
+    public TableDataInfo list(@RequestBody GymCourse gymCourse, 
                              @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
                              @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
     {

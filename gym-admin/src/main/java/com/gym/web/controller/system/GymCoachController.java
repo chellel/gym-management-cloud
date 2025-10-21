@@ -34,38 +34,31 @@ public class GymCoachController extends BaseController
 {
     private static final Logger logger = LoggerFactory.getLogger(GymCoachController.class);
     
-    private String prefix = "system/gymcoach";
-
     @Autowired
     private IGymUserService gymUserService;
-
-    @GetMapping()
-    public String gymcoach()
-    {
-        return prefix + "/gymcoach";
-    }
-
     /**
      * 查询教练列表
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(GymUser gymUser)
+    public TableDataInfo list(@RequestBody GymUser gymUser, 
+                             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
+                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
     {
+        // 记录原始参数
+        logger.debug("查询教练列表 - 原始参数: role={}, status={}, name={}", 
+                    gymUser.getRole(), gymUser.getStatus(), gymUser.getName());
+        
         // 只查询教练角色的用户
         gymUser.setRole("coach");
-        startPage();
+        
+        // 记录设置后的参数
+        logger.debug("查询教练列表 - 设置后参数: role={}, status={}, name={}", 
+                    gymUser.getRole(), gymUser.getStatus(), gymUser.getName());
+        
+        startPage(page, pageSize);
         List<GymUser> list = gymUserService.selectGymUserList(gymUser);
         return getDataTable(list);
-    }
-
-    /**
-     * 新增教练
-     */
-    @GetMapping("/add")
-    public String add()
-    {
-        return prefix + "/add";
     }
 
     /**
@@ -192,28 +185,11 @@ public class GymCoachController extends BaseController
      * 重置教练密码
      */
     @Log(title = "教练管理", businessType = BusinessType.UPDATE)
-    @GetMapping("/resetPwd/{id}")
-    public String resetPwd(@PathVariable("id") Long id, ModelMap mmap)
-    {
-        mmap.put("gymUser", gymUserService.selectGymUserById(id));
-        return prefix + "/resetPwd";
-    }
-
-    /**
-     * 重置教练密码
-     */
-    @Log(title = "教练管理", businessType = BusinessType.UPDATE)
     @PostMapping("/resetPwd")
     @ResponseBody
     public AjaxResult resetPwdSave(GymUser gymUser)
     {
         gymUser.setPassword(Md5Utils.hash(gymUser.getPassword()));
-        // 设置更新者，如果用户未登录则使用默认值
-        String updateBy = "admin"; // 默认值
-        if (getSysUser() != null && getSysUser().getLoginName() != null) {
-            updateBy = getSysUser().getLoginName();
-        }
-        gymUser.setUpdateBy(updateBy);
         return toAjax(gymUserService.resetGymUserPwd(gymUser));
     }
 
