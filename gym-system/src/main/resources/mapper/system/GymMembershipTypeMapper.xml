@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.system.mapper.GymMembershipTypeMapper">
+    
+    <resultMap type="GymMembershipType" id="GymMembershipTypeResult">
+        <result property="id"    column="id"    />
+        <result property="typeCode"    column="type_code"    />
+        <result property="typeName"    column="type_name"    />
+        <result property="durationDays"    column="duration_days"    />
+        <result property="price"    column="price"    />
+        <result property="originalPrice"    column="original_price"    />
+        <result property="description"    column="description"    />
+        <result property="benefits"    column="benefits"    />
+        <result property="isRefundable"    column="is_refundable"    />
+        <result property="refundPolicy"    column="refund_policy"    />
+        <result property="status"    column="status"    />
+        <result property="sortOrder"    column="sort_order"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="isDeleted"    column="is_deleted"    />
+        <result property="deleteTime"    column="delete_time"    />
+    </resultMap>
+
+    <sql id="selectGymMembershipTypeVo">
+        select id, type_code, type_name, duration_days, price, original_price, description, benefits, is_refundable, refund_policy, status, sort_order, remark, create_by, create_time, update_by, update_time, is_deleted, delete_time from gym_membership_type
+    </sql>
+
+    <select id="selectGymMembershipTypeList" parameterType="GymMembershipType" resultMap="GymMembershipTypeResult">
+        <include refid="selectGymMembershipTypeVo"/>
+        <where>  
+            <if test="typeCode != null  and typeCode != ''"> and type_code like concat('%', #{typeCode}, '%')</if>
+            <if test="typeName != null  and typeName != ''"> and type_name like concat('%', #{typeName}, '%')</if>
+            <if test="durationDays != null "> and duration_days = #{durationDays}</if>
+            <if test="price != null "> and price = #{price}</if>
+            <if test="originalPrice != null "> and original_price = #{originalPrice}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="benefits != null  and benefits != ''"> and benefits = #{benefits}</if>
+            <if test="isRefundable != null "> and is_refundable = #{isRefundable}</if>
+            <if test="refundPolicy != null  and refundPolicy != ''"> and refund_policy = #{refundPolicy}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="sortOrder != null "> and sort_order = #{sortOrder}</if>
+            <if test="remark != null  and remark != ''"> and remark = #{remark}</if>
+            and is_deleted = 0
+        </where>
+        order by sort_order asc, create_time desc
+    </select>
+    
+    <select id="selectGymMembershipTypeById" parameterType="Long" resultMap="GymMembershipTypeResult">
+        <include refid="selectGymMembershipTypeVo"/>
+        where id = #{id} and is_deleted = 0
+    </select>
+
+    <select id="selectGymMembershipTypeByTypeCode" parameterType="String" resultMap="GymMembershipTypeResult">
+        <include refid="selectGymMembershipTypeVo"/>
+        where type_code = #{typeCode} and is_deleted = 0
+    </select>
+
+    <select id="selectActiveGymMembershipTypeList" resultMap="GymMembershipTypeResult">
+        <include refid="selectGymMembershipTypeVo"/>
+        where status = 'active' and is_deleted = 0
+        order by sort_order asc, create_time desc
+    </select>
+
+    <select id="checkTypeCodeUnique" resultType="int">
+        select count(1) from gym_membership_type 
+        where type_code = #{typeCode} and is_deleted = 0
+        <if test="id != null">
+            and id != #{id}
+        </if>
+    </select>
+        
+    <insert id="insertGymMembershipType" parameterType="GymMembershipType" useGeneratedKeys="true" keyProperty="id">
+        insert into gym_membership_type
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="typeCode != null and typeCode != ''">type_code,</if>
+            <if test="typeName != null and typeName != ''">type_name,</if>
+            <if test="durationDays != null">duration_days,</if>
+            <if test="price != null">price,</if>
+            <if test="originalPrice != null">original_price,</if>
+            <if test="description != null">description,</if>
+            <if test="benefits != null">benefits,</if>
+            <if test="isRefundable != null">is_refundable,</if>
+            <if test="refundPolicy != null">refund_policy,</if>
+            <if test="status != null">status,</if>
+            <if test="sortOrder != null">sort_order,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="isDeleted != null">is_deleted,</if>
+            <if test="deleteTime != null">delete_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="typeCode != null and typeCode != ''">#{typeCode},</if>
+            <if test="typeName != null and typeName != ''">#{typeName},</if>
+            <if test="durationDays != null">#{durationDays},</if>
+            <if test="price != null">#{price},</if>
+            <if test="originalPrice != null">#{originalPrice},</if>
+            <if test="description != null">#{description},</if>
+            <if test="benefits != null">#{benefits},</if>
+            <if test="isUnlimited != null">#{isUnlimited},</if>
+            <if test="isRefundable != null">#{isRefundable},</if>
+            <if test="refundPolicy != null">#{refundPolicy},</if>
+            <if test="status != null">#{status},</if>
+            <if test="sortOrder != null">#{sortOrder},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="isDeleted != null">#{isDeleted},</if>
+            <if test="deleteTime != null">#{deleteTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateGymMembershipType" parameterType="GymMembershipType">
+        update gym_membership_type
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="typeCode != null and typeCode != ''">type_code = #{typeCode},</if>
+            <if test="typeName != null and typeName != ''">type_name = #{typeName},</if>
+            <if test="durationDays != null">duration_days = #{durationDays},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="benefits != null">benefits = #{benefits},</if>
+            <if test="isRefundable != null">is_refundable = #{isRefundable},</if>
+            <if test="refundPolicy != null">refund_policy = #{refundPolicy},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="deleteGymMembershipTypeById" parameterType="Long">
+        update gym_membership_type set is_deleted = 1, delete_time = now() where id = #{id}
+    </update>
+
+    <update id="deleteGymMembershipTypeByIds" parameterType="String">
+        update gym_membership_type set is_deleted = 1, delete_time = now() where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>
+
