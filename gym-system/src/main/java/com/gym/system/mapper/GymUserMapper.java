@@ -44,6 +44,14 @@ public interface GymUserMapper
     public GymUser selectGymUserByEmail(String email);
 
     /**
+     * 通过用户名查询会员
+     * 
+     * @param userName 用户名
+     * @return 会员对象信息
+     */
+    public GymUser selectGymUserByUsername(String username);
+
+    /**
      * 通过会员ID查询会员
      * 
      * @param id 会员ID

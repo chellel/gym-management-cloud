@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<resultMap type="GymUser" id="GymUserResult">
 		<id     property="id"           column="id"            />
 		<result property="userId"      column="user_id"        />
+		<result property="username"    column="username"      />
 		<result property="name"        column="name"           />
 		<result property="phone"       column="phone"         />
 		<result property="email"       column="email"         />
@@ -28,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<sql id="selectGymUserVo">
-        select id, user_id, name, phone, email, password, gender, birth_date, role, status, experience, description, hire_date,
+        select id, user_id, name as username, name, phone, email, password, gender, birth_date, role, status, experience, description, hire_date,
                create_time, update_time, create_by, update_by, is_deleted, delete_time, remark 
         from gym_user
     </sql>
@@ -77,6 +78,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		where email = #{email} and is_deleted = 0
 	</select>
 
+	<select id="selectGymUserByUsername" parameterType="String" resultMap="GymUserResult">
+		<include refid="selectGymUserVo"/>
+		where username = #{username} and is_deleted = 0
+	</select>
+
 	<select id="selectGymUserById" parameterType="Long" resultMap="GymUserResult">
 		<include refid="selectGymUserVo"/>
 		where id = #{id}
@@ -98,6 +104,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		insert into gym_user
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="userId != null and userId != ''">user_id,</if>
+			<if test="username != null and username != ''">username,</if>
 			<if test="name != null and name != ''">name,</if>
 			<if test="phone != null and phone != ''">phone,</if>
 			<if test="email != null">email,</if>
@@ -118,6 +125,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		values
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="userId != null and userId != ''">#{userId},</if>
+			<if test="username != null and username != ''">#{username},</if>
 			<if test="name != null and name != ''">#{name},</if>
 			<if test="phone != null and phone != ''">#{phone},</if>
 			<if test="email != null">#{email},</if>
@@ -141,6 +149,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		update gym_user
 		<set>
 			<if test="userId != null and userId != ''">user_id = #{userId},</if>
+			<if test="username != null and username != ''">username = #{username},</if>
 			<if test="name != null and name != ''">name = #{name},</if>
 			<if test="phone != null and phone != ''">phone = #{phone},</if>
 			<if test="email != null">email = #{email},</if>

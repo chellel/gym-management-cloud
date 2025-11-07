@@ -90,6 +90,18 @@ public class GymUserServiceImpl implements IGymUserService
     }
 
     /**
+     * 通过用户名查询会员
+     * 
+     * @param username 用户名
+     * @return 会员对象信息
+     */
+    @Override
+    public GymUser selectGymUserByUsername(String username)
+    {
+        return gymUserMapper.selectGymUserByUsername(username);
+    }
+
+    /**
      * 通过会员ID查询会员
      * 
      * @param id 会员ID
