@@ -34,10 +34,69 @@ public class GymScheduleController extends BaseController
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(@RequestBody GymSchedule gymSchedule, 
-                             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
-                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
+    public TableDataInfo list(@RequestBody Map<String, Object> request)
     {
+        // 创建查询对象
+        GymSchedule gymSchedule = new GymSchedule();
+        
+        // 提取查询条件
+        if (request.get("courseId") != null) {
+            gymSchedule.setCourseId(Long.valueOf(request.get("courseId").toString()));
+        }
+        if (request.get("coachId") != null) {
+            gymSchedule.setCoachId(Long.valueOf(request.get("coachId").toString()));
+        }
+        if (request.get("location") != null) {
+            gymSchedule.setLocation(request.get("location").toString());
+        }
+        if (request.get("status") != null) {
+            gymSchedule.setStatus(request.get("status").toString());
+        }
+        if (request.get("courseName") != null) {
+            gymSchedule.setCourseName(request.get("courseName").toString());
+        }
+        if (request.get("coachName") != null) {
+            gymSchedule.setCoachName(request.get("coachName").toString());
+        }
+        
+        // 处理日期范围查询：startDate 和 endDate 转换为 startTime 和 endTime
+        if (request.get("startDate") != null) {
+            try {
+                String startDateStr = request.get("startDate").toString();
+                // 如果只有日期，添加时间部分
+                if (startDateStr.length() == 10) {
+                    startDateStr += " 00:00:00";
+                }
+                Date startTime = DateUtils.parseDate(startDateStr, "yyyy-MM-dd HH:mm:ss");
+                gymSchedule.setStartTime(startTime);
+            } catch (Exception e) {
+                logger.warn("解析开始日期失败: {}", request.get("startDate"), e);
+            }
+        }
+        if (request.get("endDate") != null) {
+            try {
+                String endDateStr = request.get("endDate").toString();
+                // 如果只有日期，添加时间部分
+                if (endDateStr.length() == 10) {
+                    endDateStr += " 23:59:59";
+                }
+                Date endTime = DateUtils.parseDate(endDateStr, "yyyy-MM-dd HH:mm:ss");
+                gymSchedule.setEndTime(endTime);
+            } catch (Exception e) {
+                logger.warn("解析结束日期失败: {}", request.get("endDate"), e);
+            }
+        }
+        
+        // 提取分页参数
+        Integer page = 1;
+        Integer pageSize = 100;
+        if (request.get("page") != null) {
+            page = Integer.valueOf(request.get("page").toString());
+        }
+        if (request.get("pageSize") != null) {
+            pageSize = Integer.valueOf(request.get("pageSize").toString());
+        }
+        
         startPage(page, pageSize);
         List<GymSchedule> list = gymScheduleService.selectGymScheduleListWithBooking(gymSchedule);
         return getDataTable(list);
