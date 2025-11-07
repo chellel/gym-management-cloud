@@ -51,14 +51,46 @@ CREATE TABLE `gym_user` (
 
 
 
+-- 会籍类型表 (gym_membership_type)
+CREATE TABLE `gym_membership_type` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '会籍类型ID，主键',
+  `type_code` varchar(50) NOT NULL COMMENT '类型编码：month-月度会员、quarter-季度会员、half_year-半年会员、year-年度会员',
+  `type_name` varchar(100) NOT NULL COMMENT '类型名称：月度会员、季度会员、半年会员、年度会员',
+  `duration_days` int(11) NOT NULL COMMENT '有效期天数',
+  `price` decimal(10,2) NOT NULL COMMENT '价格（元）',
+  `original_price` decimal(10,2) DEFAULT NULL COMMENT '原价（元），用于显示折扣',
+  `description` text DEFAULT NULL COMMENT '类型描述',
+  `benefits` text DEFAULT NULL COMMENT '会员权益，JSON格式存储',
+  `is_refundable` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否可退款：0-不可退款，1-可退款',
+  `refund_policy` text DEFAULT NULL COMMENT '退款政策说明',
+  `status` varchar(20) NOT NULL DEFAULT 'active' COMMENT '状态：active-启用，inactive-停用',
+  `sort_order` int(11) NOT NULL DEFAULT 0 COMMENT '排序顺序',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+
+  -- 系统字段
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否删除：0-未删除，1-已删除',
+  `delete_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
+
+  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_type_code` (`type_code`),
+  KEY `idx_status` (`status`),
+  KEY `idx_sort_order` (`sort_order`),
+  KEY `idx_is_deleted` (`is_deleted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会籍类型配置表';
+
 -- 会籍表 (gym_membership)
 CREATE TABLE `gym_membership` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '会籍ID，主键',
   `user_id` bigint(20) NOT NULL COMMENT '用户ID，外键',
-  `membership_type` varchar(50) NOT NULL COMMENT '会籍类型：月度会员、季度会员、半年会员、年度会员、终身会员',
+  `membership_type_id` bigint NOT NULL COMMENT '会籍类型ID，外键',
   `start_date` date NOT NULL COMMENT '会籍开始日期',
   `expire_date` date NOT NULL COMMENT '会籍到期日期',
-  `status` varchar(20) DEFAULT 'active' COMMENT '状态：active-正常，inactive-停用，expired-过期，leave-请假',
+  `status` varchar(20) DEFAULT 'active' COMMENT '状态：active-正常，inactive-停用，expired-过期，suspended-暂停',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   
 
@@ -73,10 +105,11 @@ CREATE TABLE `gym_membership` (
   
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
-  KEY `idx_membership_type` (`membership_type`),
+  KEY `idx_membership_type_id` (`membership_type_id`),
   KEY `idx_status` (`status`),
   KEY `idx_is_deleted` (`is_deleted`),
-  FOREIGN KEY (`user_id`) REFERENCES `gym_user`(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`user_id`) REFERENCES `gym_user`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`membership_type_id`) REFERENCES `gym_membership_type`(`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会籍信息表';
 
 
@@ -99,7 +132,6 @@ CREATE TABLE `gym_course` (
   PRIMARY KEY (`id`),
   KEY `idx_is_deleted` (`is_deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课程信息表';
-
 
 
 -- 排班表 (gym_schedule)
@@ -187,28 +219,84 @@ INSERT INTO `gym_user` (`user_id`, `name`, `phone`, `email`, `password`, `gender
 
 
 
+
+-- 插入会籍类型示例数据
+INSERT INTO `gym_membership_type` (
+  `type_code`, `type_name`, `duration_days`, `price`, `original_price`, 
+  `description`, `benefits`, `is_refundable`, 
+  `refund_policy`, `status`, `sort_order`, `remark`,
+  `create_by`, `create_time`, `update_by`, `update_time`
+) VALUES
+-- 月度会员
+('month', '月度会员', 30, 299.00, 399.00, 
+ '适合短期体验的会员类型，包含基础健身设施使用权限', 
+ '["免费使用所有健身器械", "免费参加团操课程", "免费使用更衣室和淋浴设施", "免费停车"]', 
+ 1, 
+ '购买后7天内可申请退款，退款金额按使用天数扣除', 
+ 'active', 1, '月度会员，适合新用户体验', 
+ 'admin', NOW(), 'admin', NOW()),
+
+-- 季度会员
+('quarter', '季度会员', 90, 799.00, 999.00, 
+ '三个月会员卡，性价比高，适合有规律健身习惯的用户', 
+ '["免费使用所有健身器械", "免费参加团操课程", "免费使用更衣室和淋浴设施", "免费停车", "免费体测和健身计划制定", "优先预约热门课程"]', 
+ 1, 
+ '购买后15天内可申请退款，退款金额按使用天数扣除', 
+ 'active', 2, '季度会员，性价比之选', 
+ 'admin', NOW(), 'admin', NOW()),
+
+-- 半年会员
+('half_year', '半年会员', 180, 1399.00, 1799.00, 
+ '六个月会员卡，享受更多优惠和专属服务', 
+ '["免费使用所有健身器械", "免费参加团操课程", "免费使用更衣室和淋浴设施", "免费停车", "免费体测和健身计划制定", "优先预约热门课程", "免费私教体验课1次", "生日月免费私教课1次"]', 
+ 1, 1, 
+ '购买后30天内可申请退款，退款金额按使用天数扣除', 
+ 'active', 3, '半年会员，享受更多权益', 
+ 'admin', NOW(), 'admin', NOW()),
+
+-- 年度会员
+('year', '年度会员', 365, 2399.00, 2999.00, 
+ '一年期会员卡，最优惠的价格，享受所有VIP服务', 
+ '["免费使用所有健身器械", "免费参加团操课程", "免费使用更衣室和淋浴设施", "免费停车", "免费体测和健身计划制定", "优先预约热门课程", "免费私教体验课2次", "生日月免费私教课2次", "免费营养咨询", "专属储物柜", "免费毛巾服务", "生日礼品"]', 
+ 1, 
+ '购买后60天内可申请退款，退款金额按使用天数扣除', 
+ 'active', 4, '年度会员，VIP尊享服务', 
+ 'admin', NOW(), 'admin', NOW()),
+
+-- 次卡会员（限次使用）
+('visit_card', '次卡会员', 365, 599.00, 699.00, 
+ '按次计费的会员卡，适合不经常健身的用户', 
+ '["单次使用所有健身器械", "单次参加团操课程", "单次使用更衣室和淋浴设施", "单次免费停车"]', 
+ 0, 
+ '购买后30天内可申请退款，按剩余次数退款', 
+ 'active', 5, '次卡会员，按需消费', 
+ 'admin', NOW(), 'admin', NOW());
+
 -- 插入会籍示例数据
-INSERT INTO `gym_membership` (`user_id`, `membership_type`, `start_date`, `expire_date`, `status`, `remark`, `create_by`, `update_by`) VALUES
--- 张三的会籍记录
-(1, 'year', '2024-01-15', '2025-01-15', 'active', 'VIP年度会员，享受所有设施', 'admin', 'admin'),
--- 李四的会籍记录
-(2, 'half_year', '2024-01-16', '2024-07-16', 'active', '新会员半年体验', 'admin', 'admin'),
--- 王五的会籍记录
-(3, 'year', '2024-01-17', '2025-01-17', 'active', '瑜伽爱好者年度会员', 'admin', 'admin'),
--- 赵六的会籍记录（已停用）
-(4, 'quarter', '2024-01-18', '2024-04-18', 'inactive', '因个人原因暂停会员资格', 'admin', 'admin'),
--- 孙七的会籍记录（已过期）
-(5, 'month', '2024-01-19', '2024-02-19', 'expired', '月度会员已过期', 'admin', 'admin'),
--- 钱八的会籍记录（请假中）
-(6, 'year', '2024-01-20', '2025-01-20', 'leave', '因工作出差请假，会籍暂停', 'admin', 'admin'),
+INSERT INTO `gym_membership` (
+  `user_id`, `membership_type_id`, `membership_type`, `start_date`, `expire_date`, 
+  `status`, `remark`, `create_by`, `create_time`, `update_by`, `update_time`
+) VALUES
+-- 张三的会籍记录（年度会员）
+(1, 4, 'year', '2024-01-15', '2025-01-15', 'active', 'VIP年度会员，享受所有设施', 'admin', NOW(), 'admin', NOW()),
+-- 李四的会籍记录（半年会员）
+(2, 3, 'half_year', '2024-01-16', '2024-07-16', 'active', '新会员半年体验', 'admin', NOW(), 'admin', NOW()),
+-- 王五的会籍记录（年度会员）
+(3, 4, 'year', '2024-01-17', '2025-01-17', 'active', '瑜伽爱好者年度会员', 'admin', NOW(), 'admin', NOW()),
+-- 赵六的会籍记录（季度会员，已停用）
+(4, 2, 'quarter', '2024-01-18', '2024-04-18', 'inactive', '因个人原因暂停会员资格', 'admin', NOW(), 'admin', NOW()),
+-- 孙七的会籍记录（月度会员，已过期）
+(5, 1, 'month', '2024-01-19', '2024-02-19', 'expired', '月度会员已过期', 'admin', NOW(), 'admin', NOW()),
+-- 钱八的会籍记录（年度会员，请假中）
+(6, 4, 'year', '2024-01-20', '2025-01-20', 'leave', '因工作出差请假，会籍暂停', 'admin', NOW(), 'admin', NOW()),
 
 -- 历史会籍记录示例
--- 张三的上一期会籍（已过期）
-(1, 'half_year', '2023-07-15', '2024-01-15', 'expired', '上一期半年会员，已续费年度会员', 'admin', 'admin'),
--- 李四的上一期会籍（已过期）
-(2, 'month', '2023-12-16', '2024-01-16', 'expired', '月度会员升级为半年会员', 'admin', 'admin'),
--- 王五的上一期会籍（已过期）
-(3, 'quarter', '2023-10-17', '2024-01-17', 'expired', '季度会员升级为年度会员', 'admin', 'admin');
+-- 张三的上一期会籍（半年会员，已过期）
+(1, 3, 'half_year', '2023-07-15', '2024-01-15', 'expired', '上一期半年会员，已续费年度会员', 'admin', NOW(), 'admin', NOW()),
+-- 李四的上一期会籍（月度会员，已过期）
+(2, 1, 'month', '2023-12-16', '2024-01-16', 'expired', '月度会员升级为半年会员', 'admin', NOW(), 'admin', NOW()),
+-- 王五的上一期会籍（季度会员，已过期）
+(3, 2, 'quarter', '2023-10-17', '2024-01-17', 'expired', '季度会员升级为年度会员', 'admin', NOW(), 'admin', NOW());
 
 
 
@@ -411,4 +499,59 @@ INSERT INTO `gym_booking` (
 
 
 
+-- ========================================
+-- 追加更多教练数据
+-- ========================================
 
+-- 插入更多教练数据
+INSERT INTO `gym_user` (`user_id`, `name`, `phone`, `email`, `password`, `gender`, `birth_date`, `role`, `status`, `experience`, `description`, `hire_date`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `is_deleted`, `delete_time`) VALUES
+-- 普拉提专业教练
+('C005', '郑教练', '13900139005', 'zhengjiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1987-03-15', 'coach', 'active', '8年', '资深普拉提教练，国际认证', '2024-01-14', 'admin', '2024-01-14 09:00:00', 'admin', '2024-01-14 09:00:00', '普拉提专业教练，帮助会员改善体态', 0, NULL),
+
+-- 动感单车专业教练
+('C006', '王教练', '13900139006', 'wangjiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1992-11-08', 'coach', 'active', '5年', '动感单车教练，音乐节拍专家', '2024-01-15', 'admin', '2024-01-15 10:30:00', 'admin', '2024-01-15 10:30:00', '动感单车和团操课程专业教练', 0, NULL),
+
+-- CrossFit专业教练
+('C007', '李教练', '13900139007', 'lijiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1989-05-22', 'coach', 'active', '6年', 'CrossFit认证教练，功能性训练专家', '2024-01-16', 'admin', '2024-01-16 11:15:00', 'admin', '2024-01-16 11:15:00', 'CrossFit和功能性训练专业教练', 0, NULL),
+
+-- 拳击专业教练
+('C008', '张教练', '13900139008', 'zhangjiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1991-08-14', 'coach', 'active', '4年', '拳击教练，前职业拳击手', '2024-01-17', 'admin', '2024-01-17 14:20:00', 'admin', '2024-01-17 14:20:00', '拳击和格斗训练专业教练', 0, NULL),
+
+-- 游泳专业教练（国家一级运动员）
+('C009', '赵教练', '13900139009', 'zhaojiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1986-12-03', 'coach', 'active', '9年', '游泳教练，国家一级运动员', '2024-01-18', 'admin', '2024-01-18 08:45:00', 'admin', '2024-01-18 08:45:00', '游泳和水上运动专业教练', 0, NULL),
+
+-- 舞蹈专业教练
+('C010', '孙教练', '13900139010', 'sunjiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1993-07-19', 'coach', 'active', '3年', '舞蹈教练，现代舞专业', '2024-01-19', 'admin', '2024-01-19 16:30:00', 'admin', '2024-01-19 16:30:00', '舞蹈和形体训练专业教练', 0, NULL),
+
+-- 康复训练专业教练
+('C011', '马教练', '13900139011', 'majiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1984-09-27', 'coach', 'active', '10年', '康复训练师，运动医学背景', '2024-01-20', 'admin', '2024-01-20 09:15:00', 'admin', '2024-01-20 09:15:00', '康复训练和运动损伤预防专家', 0, NULL),
+
+-- HIIT专业教练
+('C012', '黄教练', '13900139012', 'huangjiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1990-04-11', 'coach', 'active', '5年', 'HIIT教练，高强度训练专家', '2024-01-21', 'admin', '2024-01-21 13:45:00', 'admin', '2024-01-21 13:45:00', 'HIIT和高强度间歇训练专业教练', 0, NULL),
+
+-- 太极专业教练
+('C013', '林教练', '13900139013', 'linjiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1988-01-16', 'coach', 'active', '7年', '太极教练，传统武术传承人', '2024-01-22', 'admin', '2024-01-22 07:30:00', 'admin', '2024-01-22 07:30:00', '太极和传统武术专业教练', 0, NULL),
+
+-- 新手友好型教练
+('C014', '何教练', '13900139014', 'hejiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 0, '1994-06-08', 'coach', 'active', '2年', '新手教练，健身爱好者转专业', '2024-01-23', 'admin', '2024-01-23 15:20:00', 'admin', '2024-01-23 15:20:00', '新手友好型教练，适合初学者', 0, NULL),
+
+-- 资深教练（暂时离职）
+('C015', '罗教练', '13900139015', 'luojiaolian@example.com', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDi', 1, '1985-10-25', 'coach', 'inactive', '12年', '资深教练，因个人原因暂时离职', '2024-01-24', 'admin', '2024-01-24 10:00:00', 'admin', '2024-01-25 12:00:00', '资深教练，暂时离职', 0, NULL);
+
+
+
+ALTER TABLE `gym_membership` 
+ADD COLUMN `membership_type_id` bigint(20) NOT NULL COMMENT '会籍类型ID，外键' AFTER `user_id`;
+
+ALTER TABLE `gym_membership` 
+ADD INDEX `idx_membership_type_id` (`membership_type_id`);
+
+ALTER TABLE `gym_membership` 
+ADD CONSTRAINT `fk_membership_type` 
+FOREIGN KEY (`membership_type_id`) REFERENCES `gym_membership_type`(`id`) ON DELETE RESTRICT;
+
+UPDATE `gym_membership` SET `membership_type_id` = 1 WHERE `membership_type` = 'month';
+UPDATE `gym_membership` SET `membership_type_id` = 2 WHERE `membership_type` = 'quarter';
+UPDATE `gym_membership` SET `membership_type_id` = 3 WHERE `membership_type` = 'half_year';
+UPDATE `gym_membership` SET `membership_type_id` = 4 WHERE `membership_type` = 'year';
+UPDATE `gym_membership` SET `membership_type_id` = 5 WHERE `membership_type` = 'visit_card';
