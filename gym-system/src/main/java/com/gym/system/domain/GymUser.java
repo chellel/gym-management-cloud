@@ -30,6 +30,10 @@ public class GymUser extends BaseEntity
     @Excel(name = "用户编号")
     private String userId;
 
+    /** 用户名 */
+    @Excel(name = "用户名")
+    private String username;
+
     /** 用户姓名 */
     @Excel(name = "用户姓名")
     private String name;
@@ -113,6 +117,19 @@ public class GymUser extends BaseEntity
     public void setUserId(String userId)
     {
         this.userId = userId;
+    }
+
+    @JsonProperty("username")
+    @Xss(message = "用户名不能包含脚本字符")
+    @Size(min = 0, max = 100, message = "用户名长度不能超过100个字符")
+    public String getUsername()
+    {
+        return username;
+    }
+
+    public void setUsername(String username)
+    {
+        this.username = username;
     }
 
     @JsonProperty("name")
@@ -265,6 +282,7 @@ public class GymUser extends BaseEntity
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
             .append("id", getId())
             .append("userId", getUserId())
+            .append("username", getUsername())
             .append("name", getName())
             .append("phone", getPhone())
             .append("email", getEmail())
