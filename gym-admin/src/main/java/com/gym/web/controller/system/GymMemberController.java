@@ -50,6 +50,7 @@ public class GymMemberController extends BaseController
                              @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
     {
         startPage(page, pageSize);
+        gymMemberDTO.setRole("member");
         List<GymMemberDTO> list = gymMembershipService.selectGymMemberList(gymMemberDTO);
         return getDataTable(list);
     }

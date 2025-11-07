@@ -199,7 +199,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="location != null  and location != ''"> and s.location like concat('%', #{location}, '%')</if>
             <if test="status != null  and status != ''"> and s.status = #{status}</if>
             <if test="startTime != null "> and s.start_time &gt;= #{startTime}</if>
-            <if test="endTime != null "> and s.end_time &lt;= #{endTime}</if>
+            <if test="endTime != null "> and s.start_time &lt;= #{endTime}</if>
             <if test="courseName != null  and courseName != ''"> and c.name like concat('%', #{courseName}, '%')</if>
             <if test="coachName != null  and coachName != ''"> and u.name like concat('%', #{coachName}, '%')</if>
             and s.is_deleted = 0
