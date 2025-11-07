@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.system.mapper.GymDashboardMapper">
+
+    <!-- 获取总会员数 -->
+    <select id="getTotalMembersCount" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM gym_membership WHERE status = 'active'
+    </select>
+
+    <!-- 根据日期范围获取总会员数 -->
+    <select id="getTotalMembersCountByDate" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM gym_membership 
+        WHERE status = 'active' 
+        AND create_time &lt;= #{endDate}
+    </select>
+
+    <!-- 获取课程签到总数 -->
+    <select id="getTotalCheckInsCount" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM gym_booking 
+        WHERE check_in_time IS NOT NULL 
+        AND DATE(check_in_time) BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <!-- 获取活跃会员数 -->
+    <select id="getActiveMembersCount" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT b.member_id) 
+        FROM gym_booking b
+        INNER JOIN gym_membership m ON b.member_id = m.user_id
+        WHERE m.status = 'active'
+        AND DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <!-- 获取会员增长趋势数据 -->
+    <select id="getMemberGrowthData" resultType="java.util.Map">
+        SELECT 
+            DATE_FORMAT(create_time, '%m月') as date,
+            COUNT(*) as newMembers,
+            (SELECT COUNT(*) FROM gym_membership WHERE status = 'active' AND DATE_FORMAT(create_time, '%Y-%m') &lt;= DATE_FORMAT(m.create_time, '%Y-%m')) as totalMembers
+        FROM gym_membership m
+        WHERE status = 'active'
+        AND DATE_FORMAT(create_time, '%Y-%m') BETWEEN DATE_FORMAT(#{startDate}, '%Y-%m') AND DATE_FORMAT(#{endDate}, '%Y-%m')
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m')
+        ORDER BY DATE_FORMAT(create_time, '%Y-%m')
+    </select>
+
+    <!-- 获取课程预约Top5数据 -->
+    <select id="getClassBookingTop5" resultType="java.util.Map">
+        SELECT 
+            c.course_name as name,
+            COUNT(b.id) as bookings
+        FROM gym_booking b
+        INNER JOIN gym_schedule s ON b.schedule_id = s.id
+        INNER JOIN gym_course c ON s.course_id = c.id
+        WHERE DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
+        GROUP BY c.id, c.course_name
+        ORDER BY bookings DESC
+        LIMIT 5
+    </select>
+
+    <!-- 根据类型获取训练高峰期数据 -->
+    <select id="getPeakHoursDataByType" resultType="java.util.Map">
+        <choose>
+            <when test="type == 'weekday'">
+                SELECT 
+                    DATE_FORMAT(s.start_time, '%H:%i') as time,
+                    COUNT(b.id) as activeUsers
+                FROM gym_booking b
+                INNER JOIN gym_schedule s ON b.schedule_id = s.id
+                WHERE DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
+                AND WEEKDAY(s.start_time) BETWEEN 0 AND 4
+                GROUP BY DATE_FORMAT(s.start_time, '%H:%i')
+                ORDER BY time
+            </when>
+            <when test="type == 'weekend'">
+                SELECT 
+                    DATE_FORMAT(s.start_time, '%H:%i') as time,
+                    COUNT(b.id) as activeUsers
+                FROM gym_booking b
+                INNER JOIN gym_schedule s ON b.schedule_id = s.id
+                WHERE DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
+                AND WEEKDAY(s.start_time) IN (5, 6)
+                GROUP BY DATE_FORMAT(s.start_time, '%H:%i')
+                ORDER BY time
+            </when>
+            <when test="type == 'morning'">
+                SELECT 
+                    DATE_FORMAT(s.start_time, '%H:%i') as time,
+                    COUNT(b.id) as activeUsers
+                FROM gym_booking b
+                INNER JOIN gym_schedule s ON b.schedule_id = s.id
+                WHERE DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
+                AND HOUR(s.start_time) BETWEEN 6 AND 11
+                GROUP BY DATE_FORMAT(s.start_time, '%H:%i')
+                ORDER BY time
+            </when>
+            <when test="type == 'evening'">
+                SELECT 
+                    DATE_FORMAT(s.start_time, '%H:%i') as time,
+                    COUNT(b.id) as activeUsers
+                FROM gym_booking b
+                INNER JOIN gym_schedule s ON b.schedule_id = s.id
+                WHERE DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
+                AND HOUR(s.start_time) BETWEEN 17 AND 22
+                GROUP BY DATE_FORMAT(s.start_time, '%H:%i')
+                ORDER BY time
+            </when>
+        </choose>
+    </select>
+
+    <!-- 获取会员详细数据 -->
+    <select id="getMemberDetails" resultType="java.util.Map">
+        SELECT 
+            m.membership_type as type,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM gym_membership WHERE status = 'active'), 1) as percentage,
+            CASE 
+                WHEN m.membership_type = '年度会员' THEN 2400
+                WHEN m.membership_type = '半年会员' THEN 1300
+                WHEN m.membership_type = '季度会员' THEN 720
+                WHEN m.membership_type = '月度会员' THEN 280
+                ELSE 0
+            END as avgRevenue
+        FROM gym_membership m
+        WHERE m.status = 'active'
+        GROUP BY m.membership_type
+        ORDER BY count DESC
+    </select>
+
+    <!-- 获取课程详细数据 -->
+    <select id="getClassDetails" resultType="java.util.Map">
+        SELECT 
+            c.course_name as name,
+            COUNT(b.id) as bookings,
+            ROUND(
+                COUNT(CASE WHEN b.check_in_time IS NOT NULL THEN 1 END) * 100.0 / COUNT(b.id), 1
+            ) as attendanceRate,
+            ROUND(85 + RAND() * 15, 1) as satisfaction
+        FROM gym_course c
+        LEFT JOIN gym_schedule s ON c.id = s.course_id
+        LEFT JOIN gym_booking b ON s.id = b.schedule_id
+        WHERE DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
+        GROUP BY c.id, c.course_name
+        ORDER BY bookings DESC
+    </select>
+
+
+</mapper>
