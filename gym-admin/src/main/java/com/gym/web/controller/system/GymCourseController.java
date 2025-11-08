@@ -46,7 +46,7 @@ public class GymCourseController extends BaseController
     @Log(title = "课程管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
-    public AjaxResult addSave(@Validated GymCourse gymCourse)
+    public AjaxResult addSave(@Validated @RequestBody GymCourse gymCourse)
     {
         if (!gymCourseService.checkCourseNameUnique(gymCourse))
         {
@@ -72,7 +72,7 @@ public class GymCourseController extends BaseController
     @Log(title = "课程管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
-    public AjaxResult editSave(@Validated GymCourse gymCourse)
+    public AjaxResult editSave(@Validated @RequestBody GymCourse gymCourse)
     {
         if (!gymCourseService.checkCourseNameUnique(gymCourse))
         {

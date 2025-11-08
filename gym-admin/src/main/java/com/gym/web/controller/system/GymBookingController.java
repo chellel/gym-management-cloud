@@ -34,10 +34,18 @@ public class GymBookingController extends BaseController
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(@RequestBody GymBooking gymBooking,
+    public TableDataInfo list(@RequestBody(required = false) GymBooking gymBooking,
                              @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
-                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
+                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize,
+                             @RequestParam(value = "memberId", required = false) Long memberId)
     {
+        if (gymBooking == null) {
+            gymBooking = new GymBooking();
+        }
+        // 如果请求参数中有 memberId，优先使用请求参数
+        if (memberId != null) {
+            gymBooking.setMemberId(memberId);
+        }
         startPage(page, pageSize);
         List<GymBooking> list = gymBookingService.selectGymBookingList(gymBooking);
         return getDataTable(list);

@@ -103,23 +103,56 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="selectGymMemberList" parameterType="com.gym.system.domain.dto.GymMemberDTO" resultType="com.gym.system.domain.dto.GymMemberDTO">
-		select m.id as membershipId, m.user_id as userId, m.membership_type as membershipType, 
-		       m.start_date as membershipStartDate, m.expire_date as membershipExpireDate, 
-		       m.status as membershipStatus, m.remark,
-		       u.user_id as userCode, u.name as userName, u.phone, u.email, u.gender, 
-		       u.birth_date as birthDate, u.role, u.status as userStatus,
-		       DATEDIFF(m.expire_date, CURDATE()) as remainingDays
-		from gym_membership m
-		left join gym_user u on m.user_id = u.id
-		where m.is_deleted = 0 and u.is_deleted = 0
+		select 
+		       u.id as id,
+		       u.id as userId,
+		       u.user_id as userCode, 
+		       u.name as userName, 
+		       u.phone, 
+		       u.email, 
+		       u.gender, 
+		       u.birth_date as birthDate, 
+		       u.role, 
+		       u.status as userStatus,
+		       m.id as membershipId, 
+		       m.membership_type as membershipType, 
+		       m.start_date as membershipStartDate, 
+		       m.expire_date as membershipExpireDate, 
+		       m.status as membershipStatus, 
+		       m.remark,
+		       CASE 
+		           WHEN m.expire_date IS NOT NULL THEN DATEDIFF(m.expire_date, CURDATE())
+		           ELSE NULL
+		       END as remainingDays
+		from gym_user u
+		left join (
+			select m1.*
+			from gym_membership m1
+			where m1.is_deleted = 0
+			and m1.id = (
+				select m2.id
+				from gym_membership m2
+				where m2.user_id = m1.user_id
+				and m2.is_deleted = 0
+				order by m2.create_time desc, m2.id desc
+				limit 1
+			)
+		) m on u.id = m.user_id
+		where u.is_deleted = 0
+		<if test="role != null and role != ''">
+			AND u.role = #{role}
+		</if>
 		<if test="userCode != null and userCode != ''">
 			AND u.user_id like concat('%', #{userCode}, '%')
 		</if>
-		<if test="userName != null and userName != ''">
-			AND u.name like concat('%', #{userName}, '%')
+		<if test="name != null and name != ''">
+			AND u.name like concat('%', #{name}, '%')
 		</if>
 		<if test="phone != null and phone != ''">
 			AND u.phone = #{phone}
+		</if>
+		<if test="userStatus != null and userStatus != ''">
+			AND u.status = #{userStatus}
 		</if>
 		<if test="membershipType != null and membershipType != ''">
 			AND m.membership_type = #{membershipType}
@@ -127,10 +160,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<if test="membershipStatus != null and membershipStatus != ''">
 			AND m.status = #{membershipStatus}
 		</if>
-		<if test="userStatus != null and userStatus != ''">
-			AND u.status = #{userStatus}
-		</if>
-		order by m.create_time desc
+		order by u.create_time desc
 	</select>
 
 	<insert id="insertGymMembership" parameterType="GymMembership" useGeneratedKeys="true" keyProperty="id">

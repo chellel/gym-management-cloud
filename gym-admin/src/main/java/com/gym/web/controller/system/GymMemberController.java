@@ -1,6 +1,7 @@
 package com.gym.web.controller.system;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -45,10 +46,41 @@ public class GymMemberController extends BaseController
      */
     @PostMapping("/list")
     @ResponseBody
-    public TableDataInfo list(@RequestBody GymMemberDTO gymMemberDTO, 
-                             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page, 
-                             @RequestParam(value = "pageSize", required = false, defaultValue = "100") Integer pageSize)
+    public TableDataInfo list(@RequestBody Map<String, Object> request)
     {
+        // 创建查询对象
+        GymMemberDTO gymMemberDTO = new GymMemberDTO();
+        
+        // 从请求体中提取查询条件
+        if (request.get("userCode") != null) {
+            gymMemberDTO.setUserCode(request.get("userCode").toString());
+        }
+        if (request.get("userName") != null) {
+            gymMemberDTO.setUserName(request.get("userName").toString());
+        }
+        if (request.get("phone") != null) {
+            gymMemberDTO.setPhone(request.get("phone").toString());
+        }
+        if (request.get("membershipType") != null) {
+            gymMemberDTO.setMembershipType(request.get("membershipType").toString());
+        }
+        if (request.get("membershipStatus") != null) {
+            gymMemberDTO.setMembershipStatus(request.get("membershipStatus").toString());
+        }
+        if (request.get("userStatus") != null) {
+            gymMemberDTO.setUserStatus(request.get("userStatus").toString());
+        }
+        
+        // 从请求体中提取分页参数
+        Integer page = 1;
+        Integer pageSize = 100;
+        if (request.get("page") != null) {
+            page = Integer.valueOf(request.get("page").toString());
+        }
+        if (request.get("pageSize") != null) {
+            pageSize = Integer.valueOf(request.get("pageSize").toString());
+        }
+        
         startPage(page, pageSize);
         gymMemberDTO.setRole("member");
         List<GymMemberDTO> list = gymMembershipService.selectGymMemberList(gymMemberDTO);

@@ -14,6 +14,7 @@ import com.gym.common.core.domain.AjaxResult;
 import com.gym.common.core.page.TableDataInfo;
 import com.gym.common.enums.BusinessType;
 import com.gym.common.utils.DateUtils;
+import com.gym.common.utils.StringUtils;
 import com.gym.system.domain.GymSchedule;
 import com.gym.system.service.IGymScheduleService;
 
@@ -41,10 +42,16 @@ public class GymScheduleController extends BaseController
         
         // 提取查询条件
         if (request.get("courseId") != null) {
-            gymSchedule.setCourseId(Long.valueOf(request.get("courseId").toString()));
+            String courseIdStr = request.get("courseId").toString();
+            if (StringUtils.isNotEmpty(courseIdStr)) {
+                gymSchedule.setCourseId(Long.valueOf(courseIdStr));
+            }
         }
         if (request.get("coachId") != null) {
-            gymSchedule.setCoachId(Long.valueOf(request.get("coachId").toString()));
+            String coachIdStr = request.get("coachId").toString();
+            if (StringUtils.isNotEmpty(coachIdStr)) {
+                gymSchedule.setCoachId(Long.valueOf(coachIdStr));
+            }
         }
         if (request.get("location") != null) {
             gymSchedule.setLocation(request.get("location").toString());

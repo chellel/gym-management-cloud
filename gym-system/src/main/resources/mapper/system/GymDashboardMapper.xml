@@ -19,8 +19,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 获取课程签到总数 -->
     <select id="getTotalCheckInsCount" resultType="java.lang.Long">
         SELECT COUNT(*) FROM gym_booking 
-        WHERE check_in_time IS NOT NULL 
-        AND DATE(check_in_time) BETWEEN #{startDate} AND #{endDate}
+        WHERE checkin_time IS NOT NULL 
+        AND DATE(checkin_time) BETWEEN #{startDate} AND #{endDate}
     </select>
 
     <!-- 获取活跃会员数 -->
@@ -34,27 +34,41 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <!-- 获取会员增长趋势数据 -->
     <select id="getMemberGrowthData" resultType="java.util.Map">
+        WITH RECURSIVE month_series AS (
+            SELECT DATE_FORMAT(#{startDate}, '%Y-%m') as monthKey
+            UNION ALL
+            SELECT DATE_FORMAT(DATE_ADD(STR_TO_DATE(CONCAT(monthKey, '-01'), '%Y-%m-%d'), INTERVAL 1 MONTH), '%Y-%m') as monthKey
+            FROM month_series
+            WHERE DATE_FORMAT(DATE_ADD(STR_TO_DATE(CONCAT(monthKey, '-01'), '%Y-%m-%d'), INTERVAL 1 MONTH), '%Y-%m') &lt;= DATE_FORMAT(#{endDate}, '%Y-%m')
+        )
         SELECT 
-            DATE_FORMAT(create_time, '%m月') as date,
-            COUNT(*) as newMembers,
-            (SELECT COUNT(*) FROM gym_membership WHERE status = 'active' AND DATE_FORMAT(create_time, '%Y-%m') &lt;= DATE_FORMAT(m.create_time, '%Y-%m')) as totalMembers
-        FROM gym_membership m
-        WHERE status = 'active'
-        AND DATE_FORMAT(create_time, '%Y-%m') BETWEEN DATE_FORMAT(#{startDate}, '%Y-%m') AND DATE_FORMAT(#{endDate}, '%Y-%m')
-        GROUP BY DATE_FORMAT(create_time, '%Y-%m')
-        ORDER BY DATE_FORMAT(create_time, '%Y-%m')
+            ms.monthKey,
+            DATE_FORMAT(STR_TO_DATE(CONCAT(ms.monthKey, '-01'), '%Y-%m-%d'), '%m月') as date,
+            COALESCE(m.newMembers, 0) as newMembers,
+            (SELECT COUNT(*) FROM gym_membership WHERE status = 'active' AND DATE_FORMAT(create_time, '%Y-%m') &lt;= ms.monthKey) as totalMembers
+        FROM month_series ms
+        LEFT JOIN (
+            SELECT 
+                DATE_FORMAT(m.create_time, '%Y-%m') as monthKey,
+                COUNT(*) as newMembers
+            FROM gym_membership m
+            WHERE status = 'active'
+            AND DATE_FORMAT(m.create_time, '%Y-%m') BETWEEN DATE_FORMAT(#{startDate}, '%Y-%m') AND DATE_FORMAT(#{endDate}, '%Y-%m')
+            GROUP BY DATE_FORMAT(m.create_time, '%Y-%m')
+        ) m ON ms.monthKey = m.monthKey
+        ORDER BY ms.monthKey
     </select>
 
     <!-- 获取课程预约Top5数据 -->
     <select id="getClassBookingTop5" resultType="java.util.Map">
         SELECT 
-            c.course_name as name,
+            c.name as name,
             COUNT(b.id) as bookings
         FROM gym_booking b
         INNER JOIN gym_schedule s ON b.schedule_id = s.id
         INNER JOIN gym_course c ON s.course_id = c.id
         WHERE DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
-        GROUP BY c.id, c.course_name
+        GROUP BY c.id, c.name
         ORDER BY bookings DESC
         LIMIT 5
     </select>
@@ -131,17 +145,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!-- 获取课程详细数据 -->
     <select id="getClassDetails" resultType="java.util.Map">
         SELECT 
-            c.course_name as name,
+            c.name as name,
             COUNT(b.id) as bookings,
             ROUND(
-                COUNT(CASE WHEN b.check_in_time IS NOT NULL THEN 1 END) * 100.0 / COUNT(b.id), 1
+                COUNT(CASE WHEN b.checkin_time IS NOT NULL THEN 1 END) * 100.0 / COUNT(b.id), 1
             ) as attendanceRate,
             ROUND(85 + RAND() * 15, 1) as satisfaction
         FROM gym_course c
         LEFT JOIN gym_schedule s ON c.id = s.course_id
         LEFT JOIN gym_booking b ON s.id = b.schedule_id
         WHERE DATE(b.create_time) BETWEEN #{startDate} AND #{endDate}
-        GROUP BY c.id, c.course_name
+        GROUP BY c.id, c.name
         ORDER BY bookings DESC
     </select>
 

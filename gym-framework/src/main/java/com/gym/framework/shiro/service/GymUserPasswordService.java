@@ -36,7 +36,6 @@ public class GymUserPasswordService
     @PostConstruct
     public void init()
     {
-        userLoginRecordCache = cacheManager.getCache(ShiroConstants.USER_LOGIN_RECORD_CACHE);
     }
 
     /**

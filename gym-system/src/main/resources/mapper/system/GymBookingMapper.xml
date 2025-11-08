@@ -44,6 +44,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="memberId != null "> and b.member_id = #{memberId}</if>
             <if test="bookingTime != null "> and b.booking_time &gt;= #{bookingTime}</if>
             <if test="checkinTime != null "> and b.checkin_time &lt;= #{checkinTime}</if>
+            <if test="scheduleStartTime != null "> and date(s.start_time) &gt;= date(#{scheduleStartTime})</if>
+            <if test="scheduleEndTime != null "> and date(s.start_time) &lt;= date(#{scheduleEndTime})</if>
             <if test="courseName != null  and courseName != ''"> and c.name like concat('%', #{courseName}, '%')</if>
             <if test="coachName != null  and coachName != ''"> and u.name like concat('%', #{coachName}, '%')</if>
             and b.is_deleted = 0
